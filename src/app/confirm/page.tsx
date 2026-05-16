@@ -1,0 +1,126 @@
+import { createClient } from '@/utils/supabase/server'
+import { getLineSession } from '@/lib/line-session'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { BookingForm } from './BookingForm'
+
+export const dynamic = 'force-dynamic'
+
+type Props = {
+  searchParams: Promise<{ service?: string; date?: string; time?: string }>
+}
+
+export default async function ConfirmPage({ searchParams }: Props) {
+  const { service: serviceId, date, time } = await searchParams
+
+  if (!serviceId || !date || !time) {
+    redirect('/service')
+  }
+
+  const session = await getLineSession()
+  if (!session) redirect(`/liff?next=/confirm?service=${serviceId}&date=${date}&time=${time}`)
+
+  const supabase = await createClient()
+  const [
+    { data: service },
+    { data: branch },
+  ] = await Promise.all([
+    supabase.from('services').select('id, service_name, duration_minutes, base_price')
+      .eq('id', parseInt(serviceId)).single(),
+    supabase.from('branches').select('id, name').eq('id', session.branchId).single(),
+  ])
+
+  if (!service || !branch) redirect('/service')
+
+  const dateLabel = new Date(date).toLocaleDateString('th-TH', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+
+  // หา customer ที่ผูก line_user_id ไว้แล้ว — prefill ชื่อ/เบอร์
+  let defaultName  = session.displayName ?? ''
+  let defaultPhone = ''
+  let defaultLocation = ''
+
+  const { data: existingCustomer } = await supabase
+    .from('customers')
+    .select('name, phone, address')
+    .eq('line_user_id', session.lineUserId)
+    .maybeSingle()
+
+  if (existingCustomer) {
+    defaultName     = existingCustomer.name ?? defaultName
+    defaultPhone    = existingCustomer.phone ?? ''
+    defaultLocation = existingCustomer.address ?? ''
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+
+      <div className="bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-10">
+        <div className="flex items-center gap-3 px-4 py-4">
+          <Link href={`/service/${serviceId}?date=${date}`}
+            className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 active:scale-95 transition-transform">
+            <span className="text-lg leading-none">‹</span>
+          </Link>
+          <h1 className="font-bold text-gray-900">ยืนยันการจอง</h1>
+        </div>
+      </div>
+
+      <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
+
+        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white px-5 py-5">
+            <div className="text-3xl font-bold">{time} น.</div>
+            <div className="text-gray-400 text-sm mt-1">{dateLabel}</div>
+          </div>
+          <div className="px-5 py-4 space-y-3 text-sm">
+            <Row label="บริการ" value={service.service_name} />
+            <Row label="สาขา" value={branch.name} />
+            <Row label="ระยะเวลา" value={`${service.duration_minutes} นาที`} />
+          </div>
+        </div>
+
+        {session && (
+          <div className="flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50 px-4 py-3">
+            {session.pictureUrl && (
+              <img src={session.pictureUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
+            )}
+            <div>
+              <div className="text-xs font-medium text-green-700">เชื่อมต่อ LINE แล้ว</div>
+              <div className="text-sm font-semibold text-green-900">{session.displayName}</div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3.5 text-sm text-amber-800">
+          <span className="text-lg leading-none">⏳</span>
+          <span>ร้านจะยืนยันการจองให้ทราบทาง LINE ภายหลัง</span>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-gray-100 px-5 py-5 shadow-sm">
+          <h2 className="font-semibold text-gray-900 mb-4">ข้อมูลของคุณ</h2>
+          <BookingForm
+            serviceId={parseInt(serviceId)}
+            time={time}
+            date={date}
+            defaults={{
+              name: defaultName,
+              phone: defaultPhone,
+              location: defaultLocation,
+            }}
+          />
+        </div>
+
+      </div>
+    </main>
+  )
+}
+
+function Row({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-gray-500">{label}</span>
+      <span className="font-medium text-gray-900">{value ?? '-'}</span>
+    </div>
+  )
+}
