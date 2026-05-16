@@ -16,9 +16,16 @@ type Props = {
   }
 }
 
-type ActionType = 'confirm' | 'cancel' | 'complete' | null
+type ActionType = 'confirm' | 'cancel' | null
 
-const ACTION_CONFIG: Record<Exclude<ActionType, null>, { newStatus: string; title: string; desc: string; btnText: string; btnClass: string; loadingText: string }> = {
+const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
+  newStatus: string
+  title: string
+  desc: string
+  btnText: string
+  btnClass: string
+  loadingText: string
+}> = {
   confirm: {
     newStatus: 'ยืนยันแล้ว',
     title: 'ยืนยันการจอง?',
@@ -34,14 +41,6 @@ const ACTION_CONFIG: Record<Exclude<ActionType, null>, { newStatus: string; titl
     btnText: 'ยกเลิกการจอง',
     btnClass: 'bg-red-600 hover:bg-red-500',
     loadingText: 'กำลังยกเลิก...',
-  },
-  complete: {
-    newStatus: 'เสร็จสิ้น',
-    title: 'ทำเครื่องหมายเสร็จสิ้น?',
-    desc: 'การจองนี้จะถูกบันทึกว่าเสร็จสมบูรณ์',
-    btnText: 'เสร็จสิ้น',
-    btnClass: 'bg-blue-600 hover:bg-blue-500',
-    loadingText: 'กำลังบันทึก...',
   },
 }
 
@@ -80,38 +79,22 @@ export function AppointmentActions({ appointmentId, currentStatus, lineUserId, b
     }
   }
 
-  if (currentStatus === 'ยกเลิก' || currentStatus === 'เสร็จสิ้น') {
+  // ✅ ไม่แสดงปุ่มถ้า status เป็น ยืนยันแล้ว / เสร็จสิ้น / ยกเลิก
+  if (currentStatus !== 'รอดำเนินการ') {
     return null
   }
 
   return (
     <>
       <div className="space-y-2">
-        {currentStatus === 'รอดำเนินการ' && (
-          <>
-            <button onClick={() => setPendingAction('confirm')}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
-              ✓ ยืนยันการจอง
-            </button>
-            <button onClick={() => setPendingAction('cancel')}
-              className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
-              ✕ ยกเลิกการจอง
-            </button>
-          </>
-        )}
-
-        {currentStatus === 'ยืนยันแล้ว' && (
-          <>
-            <button onClick={() => setPendingAction('complete')}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition">
-              ✓ ทำเครื่องหมายเสร็จสิ้น
-            </button>
-            <button onClick={() => setPendingAction('cancel')}
-              className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
-              ✕ ยกเลิกการจอง
-            </button>
-          </>
-        )}
+        <button onClick={() => setPendingAction('confirm')}
+          className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
+          ✓ ยืนยันการจอง
+        </button>
+        <button onClick={() => setPendingAction('cancel')}
+          className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
+          ✕ ยกเลิกการจอง
+        </button>
 
         {error && (
           <p className="text-sm text-red-400 bg-red-950/30 border border-red-800 rounded-xl px-4 py-3">
