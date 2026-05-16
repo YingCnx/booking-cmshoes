@@ -51,13 +51,14 @@ function adminUrl(groupId: string, appointmentId?: number) {
 // ==============================================
 // Flex Templates (kilo size, สีดำ)
 // ==============================================
-function compactRow(label: string, value: string) {
+function compactRow(label: string, value: string | number | null | undefined) {
+  const safe = (value === null || value === undefined || value === '') ? '-' : String(value)
   return {
     type: 'box',
     layout: 'horizontal',
     contents: [
-      { type: 'text', text: label, color: '#8E8E93', size: 'xs', flex: 2 },
-      { type: 'text', text: value, color: '#1C1C1E', size: 'xs', weight: 'bold', flex: 4, align: 'end', wrap: true },
+      { type: 'text', text: label || '-', color: '#8E8E93', size: 'xs', flex: 2 },
+      { type: 'text', text: safe, color: '#1C1C1E', size: 'xs', weight: 'bold', flex: 4, align: 'end', wrap: true },
     ],
   }
 }
