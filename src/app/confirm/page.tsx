@@ -7,50 +7,39 @@ import { BookingForm } from './BookingForm'
 export const dynamic = 'force-dynamic'
 
 type Props = {
-  searchParams: Promise<{ service?: string; date?: string; time?: string }>
+  searchParams: Promise<{ date?: string; time?: string }>
 }
 
 export default async function ConfirmPage({ searchParams }: Props) {
-  const { service: serviceId, date, time } = await searchParams
+  const { date, time } = await searchParams
 
-  if (!serviceId || !date || !time) {
-    redirect('/service')
-  }
+  if (!date || !time) redirect('/service')
 
   const session = await getLineSession()
-  if (!session) redirect(`/liff?next=/confirm?service=${serviceId}&date=${date}&time=${time}`)
+  if (!session) redirect(`/liff?next=/confirm?date=${date}&time=${time}`)
 
   const supabase = await createClient()
-  const [
-    { data: service },
-    { data: branch },
-  ] = await Promise.all([
-    supabase.from('services').select('id, service_name, duration_minutes, base_price')
-      .eq('id', parseInt(serviceId)).single(),
-    supabase.from('branches').select('id, name').eq('id', session.branchId).single(),
-  ])
-
-  if (!service || !branch) redirect('/service')
+  const { data: branch } = await supabase
+    .from('branches').select('id, name').eq('id', session.branchId).single()
+  if (!branch) redirect('/service')
 
   const dateLabel = new Date(date).toLocaleDateString('th-TH', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 
-  // หา customer ที่ผูก line_user_id ไว้แล้ว — prefill ชื่อ/เบอร์
+  // prefill ข้อมูลจากลูกค้าเก่า (ถ้ามี)
   let defaultName  = session.displayName ?? ''
   let defaultPhone = ''
-  let defaultLocation = ''
 
-  const { data: existingCustomer } = await supabase
+  const { data: existing } = await supabase
     .from('customers')
-    .select('name, phone, address')
+    .select('name, phone')
     .eq('line_user_id', session.lineUserId)
     .maybeSingle()
 
-  if (existingCustomer) {
-    defaultName     = existingCustomer.name ?? defaultName
-    defaultPhone    = existingCustomer.phone ?? ''
-    defaultLocation = existingCustomer.address ?? ''
+  if (existing) {
+    defaultName  = existing.name  ?? defaultName
+    defaultPhone = existing.phone ?? ''
   }
 
   return (
@@ -58,7 +47,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
 
       <div className="bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-10">
         <div className="flex items-center gap-3 px-4 py-4">
-          <Link href={`/service/${serviceId}?date=${date}`}
+          <Link href={`/service/pickup?date=${date}`}
             className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 active:scale-95 transition-transform">
             <span className="text-lg leading-none">‹</span>
           </Link>
@@ -74,9 +63,8 @@ export default async function ConfirmPage({ searchParams }: Props) {
             <div className="text-gray-400 text-sm mt-1">{dateLabel}</div>
           </div>
           <div className="px-5 py-4 space-y-3 text-sm">
-            <Row label="บริการ" value={service.service_name} />
+            <Row label="บริการ" value="นัดหมายรับรองเท้า" />
             <Row label="สาขา" value={branch.name} />
-            <Row label="ระยะเวลา" value={`${service.duration_minutes} นาที`} />
           </div>
         </div>
 
@@ -100,14 +88,9 @@ export default async function ConfirmPage({ searchParams }: Props) {
         <div className="bg-white rounded-3xl border border-gray-100 px-5 py-5 shadow-sm">
           <h2 className="font-semibold text-gray-900 mb-4">ข้อมูลของคุณ</h2>
           <BookingForm
-            serviceId={parseInt(serviceId)}
             time={time}
             date={date}
-            defaults={{
-              name: defaultName,
-              phone: defaultPhone,
-              location: defaultLocation,
-            }}
+            defaults={{ name: defaultName, phone: defaultPhone }}
           />
         </div>
 

@@ -3,16 +3,15 @@
 import { useState, useTransition } from 'react'
 
 type Props = {
-  serviceId: number
   time: string
   date: string
-  defaults: { name: string; phone: string; location: string }
+  defaults: { name: string; phone: string }
 }
 
-export function BookingForm({ serviceId, time, date, defaults }: Props) {
+export function BookingForm({ time, date, defaults }: Props) {
   const [name, setName]         = useState(defaults.name)
   const [phone, setPhone]       = useState(defaults.phone)
-  const [location, setLocation] = useState(defaults.location)
+  const [location, setLocation] = useState('')
   const [shoeCount, setShoeCount] = useState('1')
   const [pending, startTransition] = useTransition()
   const [confirming, setConfirming] = useState(false)
@@ -22,8 +21,7 @@ export function BookingForm({ serviceId, time, date, defaults }: Props) {
     setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))
   }
   function handleShoeCountChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value.replace(/\D/g, '').slice(0, 2)
-    setShoeCount(v)
+    setShoeCount(e.target.value.replace(/\D/g, '').slice(0, 2))
   }
 
   function validate(): string {
@@ -51,7 +49,7 @@ export function BookingForm({ serviceId, time, date, defaults }: Props) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            serviceId, time, date,
+            time, date,
             name: name.trim(),
             phone: phone.trim(),
             location: location.trim(),

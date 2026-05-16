@@ -10,17 +10,11 @@ export default async function ServicePage() {
   if (!session) redirect('/liff?next=/service')
 
   const supabase = await createClient()
-  const [
-    { data: branch },
-    { data: services },
-  ] = await Promise.all([
-    supabase.from('branches').select('id, name, phone').eq('id', session.branchId).single(),
-    supabase.from('services')
-      .select('id, service_name, description, base_price, duration_minutes')
-      .eq('branch_id', session.branchId)
-      .eq('is_active', true)
-      .order('id'),
-  ])
+  const { data: branch } = await supabase
+    .from('branches')
+    .select('id, name, phone')
+    .eq('id', session.branchId)
+    .single()
 
   if (!branch) {
     return (
@@ -39,37 +33,25 @@ export default async function ServicePage() {
         <div className="relative">
           <div className="text-xs uppercase tracking-widest text-gray-400 mb-2 font-semibold">{branch.name}</div>
           <h1 className="text-3xl font-bold tracking-tight text-white">จองคิวซักรองเท้า</h1>
-          <p className="mt-2 text-gray-400 text-sm">เลือกบริการที่ต้องการ</p>
+          <p className="mt-2 text-gray-400 text-sm">บริการรับ-ส่งฟรีถึงบ้าน</p>
         </div>
       </div>
 
       <div className="px-4 py-6 space-y-3 max-w-lg mx-auto -mt-4">
-        {services?.map((s) => (
-          <SelectableLink key={s.id} href={`/service/${s.id}`}
-            className="block bg-white rounded-3xl border border-gray-100 px-5 py-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0 pr-4">
-                <div className="font-bold text-gray-900 text-base">{s.service_name}</div>
-                {s.description && (
-                  <div className="text-sm text-gray-500 mt-1 line-clamp-2">{s.description}</div>
-                )}
-                <div className="text-xs text-gray-400 mt-2 flex items-center gap-2">
-                  <span>⏱ {s.duration_minutes} นาที</span>
-                </div>
-              </div>
-              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center">
-                <span className="text-gray-400">→</span>
-              </div>
+        <SelectableLink href="/service/pickup"
+          className="block bg-white rounded-3xl border border-gray-100 px-5 py-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0 pr-4">
+              <div className="text-3xl mb-2">👟</div>
+              <div className="font-bold text-gray-900 text-base">นัดหมายรับรองเท้า</div>
+              <div className="text-sm text-gray-500 mt-1">เลือกวันและเวลาที่สะดวกให้พนักงานเข้ารับ</div>
+              <div className="text-xs text-emerald-600 mt-2 font-semibold">✓ บริการรับ-ส่งฟรี</div>
             </div>
-          </SelectableLink>
-        ))}
-
-        {(!services || services.length === 0) && (
-          <div className="text-center py-20 text-gray-400">
-            <div className="text-5xl mb-3">📋</div>
-            <p className="text-sm">ยังไม่มีบริการที่เปิดให้จอง</p>
+            <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center">
+              <span className="text-gray-400">→</span>
+            </div>
           </div>
-        )}
+        </SelectableLink>
       </div>
     </main>
   )

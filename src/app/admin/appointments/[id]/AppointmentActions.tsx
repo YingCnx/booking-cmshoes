@@ -16,13 +16,44 @@ type Props = {
   }
 }
 
+type ActionType = 'confirm' | 'cancel' | 'complete' | null
+
+const ACTION_CONFIG: Record<Exclude<ActionType, null>, { newStatus: string; title: string; desc: string; btnText: string; btnClass: string; loadingText: string }> = {
+  confirm: {
+    newStatus: 'ยืนยันแล้ว',
+    title: 'ยืนยันการจอง?',
+    desc: 'ระบบจะแจ้งลูกค้าผ่าน LINE ทันที',
+    btnText: 'ยืนยัน',
+    btnClass: 'bg-emerald-600 hover:bg-emerald-500',
+    loadingText: 'กำลังยืนยัน...',
+  },
+  cancel: {
+    newStatus: 'ยกเลิก',
+    title: 'ยกเลิกการจอง?',
+    desc: 'ระบบจะแจ้งลูกค้าผ่าน LINE และไม่สามารถกู้คืนได้',
+    btnText: 'ยกเลิกการจอง',
+    btnClass: 'bg-red-600 hover:bg-red-500',
+    loadingText: 'กำลังยกเลิก...',
+  },
+  complete: {
+    newStatus: 'เสร็จสิ้น',
+    title: 'ทำเครื่องหมายเสร็จสิ้น?',
+    desc: 'การจองนี้จะถูกบันทึกว่าเสร็จสมบูรณ์',
+    btnText: 'เสร็จสิ้น',
+    btnClass: 'bg-blue-600 hover:bg-blue-500',
+    loadingText: 'กำลังบันทึก...',
+  },
+}
+
 export function AppointmentActions({ appointmentId, currentStatus, lineUserId, branchId, notifyData }: Props) {
-  const [loading, setLoading] = useState<string | null>(null)
+  const [pendingAction, setPendingAction] = useState<ActionType>(null)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function updateStatus(newStatus: string, label: string) {
-    if (!confirm(`${label}?`)) return
-    setLoading(newStatus)
+  async function executeAction() {
+    if (!pendingAction) return
+    const config = ACTION_CONFIG[pendingAction]
+    setLoading(true)
     setError('')
     try {
       const res = await fetch('/api/admin/booking-status', {
@@ -30,7 +61,7 @@ export function AppointmentActions({ appointmentId, currentStatus, lineUserId, b
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           appointmentId,
-          status: newStatus,
+          status: config.newStatus,
           lineUserId,
           branchId,
           notifyData,
@@ -39,11 +70,13 @@ export function AppointmentActions({ appointmentId, currentStatus, lineUserId, b
       if (!res.ok) {
         const data = await res.json()
         setError(data.error ?? 'อัพเดตไม่สำเร็จ')
+        setLoading(false)
         return
       }
       window.location.reload()
-    } finally {
-      setLoading(null)
+    } catch {
+      setError('เกิดข้อผิดพลาด')
+      setLoading(false)
     }
   }
 
@@ -52,34 +85,65 @@ export function AppointmentActions({ appointmentId, currentStatus, lineUserId, b
   }
 
   return (
-    <div className="space-y-2">
-      {currentStatus === 'รอดำเนินการ' && (
-        <button onClick={() => updateStatus('ยืนยันแล้ว', 'ยืนยันการจอง')}
-          disabled={loading !== null}
-          className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl disabled:opacity-50 transition">
-          {loading === 'ยืนยันแล้ว' ? 'กำลังยืนยัน...' : '✓ ยืนยันการจอง'}
-        </button>
-      )}
+    <>
+      <div className="space-y-2">
+        {currentStatus === 'รอดำเนินการ' && (
+          <>
+            <button onClick={() => setPendingAction('confirm')}
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
+              ✓ ยืนยันการจอง
+            </button>
+            <button onClick={() => setPendingAction('cancel')}
+              className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
+              ✕ ยกเลิกการจอง
+            </button>
+          </>
+        )}
 
-      {currentStatus === 'ยืนยันแล้ว' && (
-        <button onClick={() => updateStatus('เสร็จสิ้น', 'ทำเครื่องหมายเสร็จสิ้น')}
-          disabled={loading !== null}
-          className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl disabled:opacity-50 transition">
-          {loading === 'เสร็จสิ้น' ? 'กำลังบันทึก...' : '✓ ทำเครื่องหมายเสร็จสิ้น'}
-        </button>
-      )}
+        {currentStatus === 'ยืนยันแล้ว' && (
+          <>
+            <button onClick={() => setPendingAction('complete')}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition">
+              ✓ ทำเครื่องหมายเสร็จสิ้น
+            </button>
+            <button onClick={() => setPendingAction('cancel')}
+              className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
+              ✕ ยกเลิกการจอง
+            </button>
+          </>
+        )}
 
-      <button onClick={() => updateStatus('ยกเลิก', 'ยกเลิกการจอง')}
-        disabled={loading !== null}
-        className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl disabled:opacity-50">
-        {loading === 'ยกเลิก' ? 'กำลังยกเลิก...' : 'ยกเลิกการจอง'}
-      </button>
+        {error && (
+          <p className="text-sm text-red-400 bg-red-950/30 border border-red-800 rounded-xl px-4 py-3">
+            {error}
+          </p>
+        )}
+      </div>
 
-      {error && (
-        <p className="text-sm text-red-400 bg-red-950/30 border border-red-800 rounded-xl px-4 py-3">
-          {error}
-        </p>
+      {/* Confirm Modal */}
+      {pendingAction && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0"
+          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-2xl overflow-hidden">
+            <div className="px-5 py-5">
+              <h3 className="text-lg font-bold text-white">{ACTION_CONFIG[pendingAction].title}</h3>
+              <p className="text-sm text-zinc-400 mt-2 leading-relaxed">
+                {ACTION_CONFIG[pendingAction].desc}
+              </p>
+            </div>
+            <div className="flex gap-2 px-5 pb-5">
+              <button onClick={() => setPendingAction(null)} disabled={loading}
+                className="flex-1 py-3 border border-zinc-700 text-zinc-400 text-sm font-medium rounded-xl disabled:opacity-50">
+                กลับ
+              </button>
+              <button onClick={executeAction} disabled={loading}
+                className={`flex-1 py-3 text-white text-sm font-bold rounded-xl disabled:opacity-50 transition ${ACTION_CONFIG[pendingAction].btnClass}`}>
+                {loading ? ACTION_CONFIG[pendingAction].loadingText : ACTION_CONFIG[pendingAction].btnText}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-    </div>
+    </>
   )
 }

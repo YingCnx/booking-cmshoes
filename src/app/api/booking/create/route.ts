@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import { getLineSession } from '@/lib/line-session'
 import { after } from 'next/server'
 
+const DEFAULT_DURATION = 60   // นัดรับรองเท้าครั้งละ 60 นาที
+
 function addMinutes(time: string, minutes: number) {
   const [h, m] = time.split(':').map(Number)
   const d = new Date()
@@ -11,9 +13,9 @@ function addMinutes(time: string, minutes: number) {
 }
 
 export async function POST(req: Request) {
-  const { serviceId, time, date, name, phone, location, shoeCount } = await req.json()
+  const { time, date, name, phone, location, shoeCount } = await req.json()
 
-  if (!serviceId || !time || !date || !name || !phone || !location || !shoeCount) {
+  if (!time || !date || !name || !phone || !location || !shoeCount) {
     return NextResponse.json({ error: 'ข้อมูลไม่ครบถ้วน' }, { status: 400 })
   }
   if (!/^\d{10}$/.test(phone)) {
@@ -28,11 +30,9 @@ export async function POST(req: Request) {
   const supabase = await createClient()
 
   const [
-    { data: service },
     { data: branch },
     { data: existing },
   ] = await Promise.all([
-    supabase.from('services').select('id, service_name, duration_minutes, base_price').eq('id', serviceId).single(),
     supabase.from('branches').select('id, name, max_parallel_bookings').eq('id', session.branchId).single(),
     supabase.from('appointments')
       .select('appointment_time, end_time')
@@ -41,11 +41,9 @@ export async function POST(req: Request) {
       .in('status', ['รอดำเนินการ', 'ยืนยันแล้ว']),
   ])
 
-  if (!service) return NextResponse.json({ error: 'ไม่พบบริการ' }, { status: 404 })
-  if (!branch)  return NextResponse.json({ error: 'ไม่พบสาขา' }, { status: 404 })
+  if (!branch) return NextResponse.json({ error: 'ไม่พบสาขา' }, { status: 404 })
 
-  const duration = service.duration_minutes ?? 60
-  const endTime = addMinutes(time, duration)
+  const endTime = addMinutes(time, DEFAULT_DURATION)
   const maxParallel = branch.max_parallel_bookings ?? 3
 
   // เช็คช่วงเวลาซ้อนทับ
@@ -57,7 +55,7 @@ export async function POST(req: Request) {
     const bStart = toMinutes(String(b.appointment_time).slice(0,5))
     const bEnd   = b.end_time
       ? toMinutes(String(b.end_time).slice(0,5))
-      : bStart + duration
+      : bStart + DEFAULT_DURATION
     return startMin < bEnd && endMin > bStart
   }).length
 
@@ -65,67 +63,93 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'เวลานี้เต็มแล้ว' }, { status: 409 })
   }
 
-  // ============================
-  // Upsert customer — ยึด line_user_id เป็นหลัก
-  // ============================
+  // ============================================
+  // Customer Logic — ตรงกับระบบหลังบ้าน
+  // ============================================
+  // 1. ถ้ามี line_user_id ใน DB แล้ว → UPDATE แค่ name + line_display_name
+  // 2. ถ้าไม่มี → ตรวจ phone (unique per branch):
+  //    - เจอ → UPDATE name + line_user_id + line_display_name
+  //    - ไม่เจอ → INSERT ใหม่ + สร้าง customer_code = C{branchId}{id padded 3}
+  // (address/shoe_count ไม่บันทึกใน customers — เก็บใน appointments เท่านั้น)
+  // ============================================
   let customer: any = null
 
+  // หาจาก line_user_id ก่อน
   if (session.lineUserId) {
     const { data } = await supabase
       .from('customers')
-      .select('id')
+      .select('id, branch_id')
       .eq('line_user_id', session.lineUserId)
       .maybeSingle()
     customer = data
   }
 
   if (customer) {
-    // UPDATE
+    // มี line_user_id ในระบบแล้ว — update แค่ชื่อ
     await supabase.from('customers').update({
-      name, phone, address: location,
+      name,
       line_display_name: session.displayName,
       updated_at: new Date().toISOString(),
     }).eq('id', customer.id)
   } else {
-    // ตรวจสอบ phone ก่อน — เผื่อ customer เคยมาจาก walk-in แล้ว
+    // หา phone ซ้ำใน branch เดียวกัน
     const { data: byPhone } = await supabase
       .from('customers')
-      .select('id, line_user_id')
+      .select('id, line_user_id, branch_id')
       .eq('phone', phone)
       .eq('branch_id', session.branchId)
       .maybeSingle()
 
     if (byPhone) {
+      // เบอร์เคยอยู่ในระบบ — update name + line_user_id (ถ้ายังไม่มี)
       const updates: any = {
-        name, address: location,
+        name,
         line_display_name: session.displayName,
         updated_at: new Date().toISOString(),
       }
-      if (!byPhone.line_user_id) updates.line_user_id = session.lineUserId
+      if (!byPhone.line_user_id) {
+        updates.line_user_id = session.lineUserId
+      }
       await supabase.from('customers').update(updates).eq('id', byPhone.id)
       customer = byPhone
     } else {
+      // ใหม่ทั้งหมด — INSERT
       const { data: newC, error: cErr } = await supabase
         .from('customers')
         .insert({
-          name, phone, address: location,
+          name,
+          phone,
           branch_id: session.branchId,
           line_user_id: session.lineUserId,
           line_display_name: session.displayName,
           origin_source: 'line_booking',
           status: 'active',
         })
-        .select('id').single()
+        .select('id, branch_id')
+        .single()
+
       if (cErr || !newC) {
-        return NextResponse.json({ error: 'บันทึกลูกค้าไม่สำเร็จ: ' + cErr?.message }, { status: 500 })
+        return NextResponse.json({
+          error: 'บันทึกลูกค้าไม่สำเร็จ: ' + cErr?.message,
+        }, { status: 500 })
       }
+
+      // สร้าง customer_code = C{branch_id}{id padded 3 หลัก}
+      const customerCode = `C${newC.branch_id}${String(newC.id).padStart(3, '0')}`
+      await supabase.from('customers')
+        .update({ customer_code: customerCode })
+        .eq('id', newC.id)
+
       customer = newC
     }
   }
 
-  // ============================
+  // ============================================
   // INSERT appointment
-  // ============================
+  // - status = 'รอดำเนินการ'
+  // - appointment_type = 'pickup'
+  // - service_id ไม่ใส่ (ลูกค้าส่งหลายคู่ในนัดเดียว)
+  // ============================================
   const { data: apt, error: aptErr } = await supabase
     .from('appointments')
     .insert({
@@ -139,18 +163,17 @@ export async function POST(req: Request) {
       status: 'รอดำเนินการ',
       branch_id: session.branchId,
       customer_id: customer.id,
-      service_id: serviceId,
-      appointment_type: 'line_booking',
+      appointment_type: 'pickup',
     })
     .select('id').single()
 
   if (aptErr || !apt) {
-    return NextResponse.json({ error: 'สร้างการจองไม่สำเร็จ: ' + aptErr?.message }, { status: 500 })
+    return NextResponse.json({
+      error: 'สร้างการจองไม่สำเร็จ: ' + aptErr?.message,
+    }, { status: 500 })
   }
 
-  // ============================
-  // Notify LINE (non-blocking)
-  // ============================
+  // แจ้ง LINE (non-blocking)
   after(async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/line/notify`, {
@@ -164,7 +187,7 @@ export async function POST(req: Request) {
             lineUserId: session.lineUserId,
             customerName: name,
             phone,
-            serviceName: service.service_name,
+            serviceName: 'นัดหมายรับรองเท้า',
             branchName: branch.name,
             date,
             time,
