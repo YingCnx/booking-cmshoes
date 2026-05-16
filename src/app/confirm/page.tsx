@@ -19,8 +19,19 @@ export default async function ConfirmPage({ searchParams }: Props) {
   if (!session) redirect(`/liff?next=/confirm?date=${date}&time=${time}`)
 
   const supabase = await createClient()
-  const { data: branch } = await supabase
-    .from('branches').select('id, name').eq('id', session.branchId).single()
+
+  // ✅ ดึง branch + existing customer parallel
+  const [
+    { data: branch },
+    { data: existing },
+  ] = await Promise.all([
+    supabase.from('branches').select('id, name').eq('id', session.branchId).single(),
+    supabase.from('customers')
+      .select('name, phone')
+      .eq('line_user_id', session.lineUserId)
+      .maybeSingle(),
+  ])
+
   if (!branch) redirect('/service')
 
   const dateLabel = new Date(date).toLocaleDateString('th-TH', {
@@ -30,12 +41,6 @@ export default async function ConfirmPage({ searchParams }: Props) {
   // prefill ข้อมูลจากลูกค้าเก่า (ถ้ามี)
   let defaultName  = session.displayName ?? ''
   let defaultPhone = ''
-
-  const { data: existing } = await supabase
-    .from('customers')
-    .select('name, phone')
-    .eq('line_user_id', session.lineUserId)
-    .maybeSingle()
 
   if (existing) {
     defaultName  = existing.name  ?? defaultName

@@ -3,7 +3,7 @@ import { getLineSession } from '@/lib/line-session'
 import { redirect } from 'next/navigation'
 import { SelectableLink } from '@/components/SelectableLink'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60   // cache 1 นาที
 
 export default async function ServicePage() {
   const session = await getLineSession()
