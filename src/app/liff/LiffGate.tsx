@@ -16,8 +16,10 @@ export function LiffGate({ liffId, redirectTo }: Props) {
       setError('ระบบยังไม่ได้ตั้งค่า LIFF')
       return
     }
+
     async function start() {
       try {
+        // โหลด SDK
         if (!document.querySelector('script[src*="liff/edge"]')) {
           await new Promise<void>((resolve, reject) => {
             const s = document.createElement('script')
@@ -36,17 +38,31 @@ export function LiffGate({ liffId, redirectTo }: Props) {
           return
         }
 
+        // ✅ ลอง getProfile — ถ้า token expired จะ throw "The access token expired"
         setStatus('กำลังโหลดข้อมูล...')
-        const profile = await window.liff.getProfile()
+        let profile
+        try {
+          profile = await window.liff.getProfile()
+        } catch (e: any) {
+          // ✅ token expired → logout + login ใหม่อัตโนมัติ
+          const msg = String(e?.message || e)
+          if (msg.toLowerCase().includes('expired') || msg.includes('access token')) {
+            setStatus('Token หมดอายุ กำลัง login ใหม่...')
+            try { window.liff.logout() } catch {}
+            window.liff.login({ redirectUri: window.location.href })
+            return
+          }
+          throw e
+        }
 
-        // ✅ ส่ง userId ตรงๆ (ไม่ใช้ idToken)
+        // ส่ง userId ไป server
         const res = await fetch('/api/liff/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            lineUserId: profile.userId,
+            lineUserId:  profile.userId,
             displayName: profile.displayName,
-            pictureUrl: profile.pictureUrl,
+            pictureUrl:  profile.pictureUrl,
             liffId,
           }),
         })
@@ -58,7 +74,14 @@ export function LiffGate({ liffId, redirectTo }: Props) {
         }
         window.location.href = redirectTo
       } catch (err: any) {
-        setError(err?.message ?? 'เกิดข้อผิดพลาด')
+        const msg = err?.message ?? 'เกิดข้อผิดพลาด'
+        // ✅ ถ้า error message เกี่ยวกับ token → relogin
+        if (msg.toLowerCase().includes('expired') || msg.includes('access token')) {
+          try { window.liff?.logout?.() } catch {}
+          try { window.liff?.login?.({ redirectUri: window.location.href }) } catch {}
+          return
+        }
+        setError(msg)
       }
     }
     start()
@@ -69,7 +92,11 @@ export function LiffGate({ liffId, redirectTo }: Props) {
       <div className="text-center max-w-sm">
         <div className="text-5xl mb-3">⚠️</div>
         <p className="text-red-600 text-sm">{error}</p>
-        <button onClick={() => window.location.reload()}
+        <button onClick={() => {
+          // ✅ ปุ่มลองใหม่ — logout LIFF ก่อนแล้ว reload
+          try { window.liff?.logout?.() } catch {}
+          window.location.reload()
+        }}
           className="mt-6 bg-black text-white px-6 py-3 rounded-xl text-sm font-bold">
           ลองใหม่
         </button>
