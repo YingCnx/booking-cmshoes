@@ -21,6 +21,10 @@ export function LinkPhoneForm({ displayName }: Props) {
     }
     setError('')
 
+    // ✅ กล่องยืนยัน 
+    const confirmed = confirm( `ยืนยันการผูกบัญชีกับเบอร์\n${phone}` ) 
+    if (!confirmed) { return }
+    
     startTransition(async () => {
       try {
         const res = await fetch('/api/customer/link', {
