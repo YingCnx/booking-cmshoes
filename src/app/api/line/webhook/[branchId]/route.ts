@@ -1,5 +1,3 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
 import {
   buildStatusCarouselFlex,
   buildLinkAccountFlex,
@@ -8,65 +6,27 @@ import {
   type StatusQueue,
 } from '@/lib/status-flex'
 import { ACTIVE_QUEUE_STATUSES } from '@/lib/queue-status'
-import crypto from 'crypto'
 
-function verifySignature(body: string, signature: string, secret: string): boolean {
-  const hash = crypto.createHmac('SHA256', secret).update(body).digest('base64')
-  return hash === signature
-}
-
-type Props = { params: Promise<{ branchId: string }> }
-
-export async function POST(req: Request, { params }: Props) {
-  const { branchId } = await params
-  const branchIdNum = parseInt(branchId)
-
-  const rawBody = await req.text()
-  const signature = req.headers.get('x-line-signature') ?? ''
-
-  const supabase = await createClient()
-  const { data: branch } = await supabase
-    .from('branches')
-    .select('id, name, line_channel_secret, line_access_token, line_liff_id')
-    .eq('id', branchIdNum)
-    .maybeSingle()
-
-  if (!branch || !branch.line_channel_secret) {
-    return NextResponse.json({ error: 'branch/secret not found' }, { status: 404 })
-  }
-
-  if (!verifySignature(rawBody, signature, branch.line_channel_secret)) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-  }
-
-  const body = JSON.parse(rawBody)
-  const events = body.events ?? []
-
-  for (const event of events) {
-    const trigger =
-      event.postback?.data ??
-      (event.type === 'message' && event.message?.type === 'text' ? event.message.text : null)
-
-    console.log(`[webhook ${branch.name}]`, {
-      type: event.type,
-      userId: event.source?.userId ?? '-',
-      trigger,
-    })
-
-    if (trigger === 'เช็คสถานะ' || trigger === 'check_status') {
-      await handleCheckStatus(event, branch, supabase)
-    }
-  }
-
-  return NextResponse.json({ ok: true })
-}
-
-async function handleCheckStatus(event: any, branch: any, supabase: any) {
+async function handleCheckStatus(
+  event: any,
+  branch: any,
+  supabase: any
+) {
   const lineUserId = event.source?.userId
   const replyToken = event.replyToken
-  if (!lineUserId || !replyToken || !branch.line_access_token) return
 
+  if (
+    !lineUserId ||
+    !replyToken ||
+    !branch.line_access_token
+  ) {
+    return
+  }
+
+  // ============================================
   // หา customer
+  // ============================================
+
   const { data: customer } = await supabase
     .from('customers')
     .select('id, name')
@@ -74,52 +34,112 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     .eq('branch_id', branch.id)
     .maybeSingle()
 
-  // กรณี 1: ไม่เจอ customer
+  // ============================================
+  // ยังไม่ได้ผูกบัญชี
+  // ============================================
+
   if (!customer) {
     const liffUrl = branch.line_liff_id
       ? `https://liff.line.me/${branch.line_liff_id}?next=/status`
       : `${process.env.NEXT_PUBLIC_SITE_URL}/status`
-    await replyMessage(replyToken, [buildLinkAccountFlex(liffUrl)], branch.line_access_token)
+
+    await replyMessage(
+      replyToken,
+      [buildLinkAccountFlex(liffUrl)],
+      branch.line_access_token
+    )
+
     return
   }
 
-  // ✅ ใช้ column ที่ถูกต้องตาม schema:
-  //    received_date, total_price, delivery_date
-  const { data: queues } = await supabase
-    .from('queue')
-    .select(`
-      id, status, queue_number, received_date, total_price, delivery_date,
-      queue_items ( id )
-    `)
-    .eq('customer_id', customer.id)
-    .in('status', ACTIVE_QUEUE_STATUSES as any)
-    .order('received_date', { ascending: false })
-    .limit(1)
-    .single()
-    
-  console.log('[handleCheckStatus] customer:', customer.id, 'queues:', queues?.length ?? 0)
+  // ============================================
+  // ดึง queue ล่าสุด
+  // ============================================
 
-  if (!queues || queues.length === 0) {
-    await replyMessage(replyToken, [buildNoQueueFlex()], branch.line_access_token)
+  const { data: queue, error } =
+    await supabase
+      .from('queue')
+      .select(`
+        id,
+        status,
+        queue_number,
+        received_date,
+        total_price,
+        delivery_date,
+        queue_items (
+          id
+        )
+      `)
+      .eq('customer_id', customer.id)
+      .in(
+        'status',
+        ACTIVE_QUEUE_STATUSES as any
+      )
+      .order('received_date', {
+        ascending: false,
+      })
+      .limit(1)
+      .maybeSingle()
+
+  console.log(
+    '[handleCheckStatus]',
+    {
+      customerId: customer.id,
+      queueId: queue?.id ?? null,
+      error,
+    }
+  )
+
+  // ============================================
+  // ไม่มี queue
+  // ============================================
+
+  if (!queue) {
+    await replyMessage(
+      replyToken,
+      [buildNoQueueFlex()],
+      branch.line_access_token
+    )
+
     return
   }
 
-  const statusQueues: StatusQueue[] = queues.map((q: any) => ({
-    id: q.id,
-    status: q.status,
-    queue_number: q.queue_number,
-    received_date: q.received_date,
-    total_price: q.total_price,
-    delivery_date: q.delivery_date,
-    item_count: q.queue_items?.length ?? 0,
-  }))
+  // ============================================
+  // แปลงข้อมูล
+  // ============================================
 
-  const flex = buildStatusCarouselFlex(statusQueues)
-  if (flex) {
-    await replyMessage(replyToken, [flex], branch.line_access_token)
+  const statusQueue: StatusQueue = {
+    id: queue.id,
+    status: queue.status,
+    queue_number: queue.queue_number,
+    received_date: queue.received_date,
+    total_price: queue.total_price,
+    delivery_date: queue.delivery_date,
+    item_count:
+      queue.queue_items?.length ?? 0,
   }
+
+  // ============================================
+  // Build Flex
+  // ============================================
+
+  const flex =
+    buildStatusCarouselFlex([
+      statusQueue,
+    ])
+
+  if (!flex) {
+    return
+  }
+
+  // ============================================
+  // Reply
+  // ============================================
+
+  await replyMessage(
+    replyToken,
+    [flex],
+    branch.line_access_token
+  )
 }
 
-export async function GET() {
-  return NextResponse.json({ ok: true })
-}
