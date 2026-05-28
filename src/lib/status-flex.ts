@@ -1,8 +1,9 @@
+
 // ============================================
-// Status Flex Messages — ตอบในแชท
+// Status Flex Messages — Minimal Clean Style
 // ============================================
 
-import { getStatusStyle, QUEUE_STATUSES } from '@/lib/queue-status'
+import { getStatusStyle } from '@/lib/queue-status'
 
 export type StatusQueue = {
   id: number
@@ -14,106 +15,239 @@ export type StatusQueue = {
   item_count: number
 }
 
+// ============================================
+// Compact Row
+// ============================================
+
 function compactRow(label: string, value: string | number) {
-  const safe = value === null || value === undefined || value === '' ? '-' : String(value)
+  const safe =
+    value === null ||
+    value === undefined ||
+    value === ''
+      ? '-'
+      : String(value)
+
   return {
     type: 'box',
     layout: 'horizontal',
     contents: [
-      { type: 'text', text: label, color: '#8E8E93', size: 'xs', flex: 2 },
-      { type: 'text', text: safe, color: '#1C1C1E', size: 'xs', weight: 'bold', flex: 4, align: 'end', wrap: true },
+      {
+        type: 'text',
+        text: label,
+        color: '#9CA3AF',
+        size: 'sm',
+        flex: 3,
+      },
+      {
+        type: 'text',
+        text: safe,
+        color: '#111827',
+        size: 'sm',
+        weight: 'bold',
+        flex: 5,
+        align: 'end',
+        wrap: true,
+      },
     ],
   }
 }
 
+// ============================================
+// Progress Bar
+// ============================================
+
 function progressBar(currentStep: number) {
-  const steps = []
-  for (let i = 1; i <= 5; i++) {
-    steps.push({
-      type: 'box',
-      layout: 'vertical',
-      flex: 1,
-      height: '6px',
-      backgroundColor: i <= currentStep ? '#18181B' : '#E5E7EB',
-      cornerRadius: '3px',
-      contents: [{ type: 'filler' }],
-    })
-  }
   return {
     type: 'box',
     layout: 'horizontal',
-    spacing: 'xs',
-    contents: steps,
+    spacing: 'sm',
+
+    contents: Array.from({ length: 5 }, (_, i) => ({
+      type: 'box',
+      layout: 'vertical',
+      flex: 1,
+      height: '4px',
+      backgroundColor:
+        i < currentStep
+          ? '#111827'
+          : '#E5E7EB',
+      cornerRadius: '999px',
+      contents: [{ type: 'filler' }],
+    })),
   }
 }
 
-export function buildQueueBubble(q: StatusQueue) {
+// ============================================
+// Queue Bubble
+// ============================================
+
+export function buildQueueBubble(
+  q: StatusQueue
+) {
   const style = getStatusStyle(q.status)
+
   const receivedLabel = q.received_date
-    ? new Date(q.received_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
+    ? new Date(
+        q.received_date
+      ).toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'short',
+      })
     : '-'
+
   const deliveryLabel = q.delivery_date
-    ? new Date(q.delivery_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
+    ? new Date(
+        q.delivery_date
+      ).toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'short',
+      })
     : null
 
-  // ✅ guard ทุก string ให้แน่ใจว่ามีค่า
-  const queueLabel = String(q.queue_number || `Queue #${q.id}`)
+  const queueLabel = String(
+    q.queue_number || `#${q.id}`
+  )
+
   const itemLabel = `${q.item_count || 0} คู่`
-  const statusLabel = String(q.status || '-')
+
+  const statusLabel = String(
+    q.status || '-'
+  )
 
   return {
     type: 'bubble',
-    size: 'kilo',
-    header: {
-      type: 'box',
-      layout: 'vertical',
-      backgroundColor: '#18181B',
-      paddingAll: '12px',
-      contents: [
-        {
-          type: 'text',
-          text: queueLabel,
-          color: '#9CA3AF',
-          size: 'xs',
-          weight: 'bold',
-        },
-        {
-          type: 'text',
-          text: itemLabel,
-          color: '#FFFFFF',
-          size: 'lg',
-          weight: 'bold',
-          margin: 'sm',
-        },
-      ],
+    size: 'mega',
+
+    styles: {
+      body: {
+        backgroundColor: '#FFFFFF',
+      },
+      footer: {
+        separator: false,
+      },
     },
+
     body: {
       type: 'box',
       layout: 'vertical',
-      paddingAll: '12px',
-      spacing: 'sm',
+      paddingAll: '20px',
+      spacing: 'lg',
+
       contents: [
+        // Header
         {
-          type: 'text',
-          text: `${style.icon} ${statusLabel}`,
-          size: 'sm',
-          weight: 'bold',
-          color: '#1C1C1E',
-          wrap: true,
+          type: 'box',
+          layout: 'horizontal',
+          alignItems: 'center',
+
+          contents: [
+            {
+              type: 'box',
+              layout: 'vertical',
+              flex: 1,
+
+              contents: [
+                {
+                  type: 'text',
+                  text: queueLabel,
+                  size: 'xs',
+                  color: '#9CA3AF',
+                  weight: 'bold',
+                },
+
+                {
+                  type: 'text',
+                  text: itemLabel,
+                  size: 'xl',
+                  weight: 'bold',
+                  color: '#111827',
+                  margin: 'xs',
+                },
+              ],
+            },
+
+            {
+              type: 'box',
+              layout: 'vertical',
+              backgroundColor: '#F3F4F6',
+              cornerRadius: '999px',
+              paddingStart: '10px',
+              paddingEnd: '10px',
+              paddingTop: '4px',
+              paddingBottom: '4px',
+
+              contents: [
+                {
+                  type: 'text',
+                  text: statusLabel,
+                  size: 'xs',
+                  color: '#374151',
+                  weight: 'bold',
+                  align: 'center',
+                },
+              ],
+            },
+          ],
         },
+
+        // Progress
         progressBar(style.step),
-        { type: 'separator', margin: 'md' },
-        compactRow('เข้ารับ', receivedLabel),
-        ...(deliveryLabel ? [compactRow('นัดส่ง', deliveryLabel)] : []),
-        ...(q.total_price && q.total_price > 0 ? [compactRow('ยอด', `฿${q.total_price.toLocaleString()}`)] : []),
+
+        // Divider
+        {
+          type: 'separator',
+          color: '#F3F4F6',
+        },
+
+        // Detail
+        {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'md',
+
+          contents: [
+            compactRow(
+              'วันที่รับ',
+              receivedLabel
+            ),
+
+            ...(deliveryLabel
+              ? [
+                  compactRow(
+                    'วันที่ส่ง',
+                    deliveryLabel
+                  ),
+                ]
+              : []),
+
+            ...(q.total_price &&
+            q.total_price > 0
+              ? [
+                  compactRow(
+                    'ยอดรวม',
+                    `฿${q.total_price.toLocaleString()}`
+                  ),
+                ]
+              : []),
+          ],
+        },
       ],
     },
   }
 }
 
-export function buildStatusCarouselFlex(queues: StatusQueue[]) {
+// ============================================
+// Carousel
+// ============================================
+
+export function buildStatusCarouselFlex(
+  queues: StatusQueue[]
+) {
   if (queues.length === 0) return null
-  const bubbles = queues.slice(0, 12).map(buildQueueBubble)
+
+  const bubbles = queues
+    .slice(0, 12)
+    .map(buildQueueBubble)
 
   if (bubbles.length === 1) {
     return {
@@ -122,6 +256,7 @@ export function buildStatusCarouselFlex(queues: StatusQueue[]) {
       contents: bubbles[0],
     }
   }
+
   return {
     type: 'flex',
     altText: `สถานะรองเท้า ${queues.length} รายการ`,
@@ -132,86 +267,140 @@ export function buildStatusCarouselFlex(queues: StatusQueue[]) {
   }
 }
 
-export function buildLinkAccountFlex(liffUrl: string) {
+// ============================================
+// Link Account
+// ============================================
+
+export function buildLinkAccountFlex(
+  liffUrl: string
+) {
   return {
     type: 'flex',
     altText: 'ผูกบัญชีก่อนเช็คสถานะ',
+
     contents: {
       type: 'bubble',
-      size: 'kilo',
-      header: {
-        type: 'box',
-        layout: 'vertical',
-        backgroundColor: '#18181B',
-        paddingAll: '12px',
-        contents: [
-          { type: 'text', text: 'เช็คสถานะ', color: '#FBBF24', size: 'xxs', weight: 'bold' },
-          { type: 'text', text: 'ผูกบัญชีก่อนใช้งาน', color: '#FFFFFF', size: 'md', weight: 'bold', margin: 'xs' },
-        ],
-      },
+      size: 'mega',
+
       body: {
         type: 'box',
         layout: 'vertical',
-        paddingAll: '12px',
+        paddingAll: '24px',
+        spacing: 'lg',
+
         contents: [
           {
             type: 'text',
-            text: 'กรุณาผูกบัญชี LINE กับเบอร์โทรที่เคยใช้บริการ',
+            text: 'เชื่อมบัญชี LINE',
+            size: 'lg',
+            weight: 'bold',
+            color: '#111827',
+          },
+
+          {
+            type: 'text',
+            text:
+              'กรุณาผูกบัญชีด้วยเบอร์โทรที่เคยใช้บริการ เพื่อเช็คสถานะรองเท้า',
             size: 'sm',
             color: '#6B7280',
             wrap: true,
           },
-        ],
-      },
-      footer: {
-        type: 'box',
-        layout: 'vertical',
-        paddingAll: '12px',
-        contents: [
+
           {
             type: 'button',
             style: 'primary',
-            color: '#18181B',
-            height: 'sm',
-            action: { type: 'uri', label: 'ผูกบัญชี', uri: liffUrl },
+            color: '#111827',
+
+            action: {
+              type: 'uri',
+              label: 'ผูกบัญชี',
+              uri: liffUrl,
+            },
           },
         ],
       },
     },
   }
 }
+
+// ============================================
+// No Queue
+// ============================================
 
 export function buildNoQueueFlex() {
   return {
     type: 'flex',
     altText: 'ยังไม่มีรายการ',
+
     contents: {
       type: 'bubble',
-      size: 'kilo',
+      size: 'mega',
+
       body: {
         type: 'box',
         layout: 'vertical',
-        paddingAll: '20px',
-        spacing: 'md',
+        paddingAll: '28px',
+        spacing: 'lg',
+
         contents: [
-          { type: 'text', text: '📭', size: '4xl', align: 'center' },
-          { type: 'text', text: 'ยังไม่มีรายการ', size: 'md', weight: 'bold', align: 'center', color: '#1C1C1E' },
-          { type: 'text', text: 'ตอนนี้ยังไม่มีรองเท้าอยู่ในร้าน', size: 'sm', color: '#6B7280', align: 'center', wrap: true },
+          {
+            type: 'text',
+            text: 'ยังไม่มีรายการ',
+            size: 'lg',
+            weight: 'bold',
+            align: 'center',
+            color: '#111827',
+          },
+
+          {
+            type: 'text',
+            text:
+              'ตอนนี้ยังไม่มีรองเท้าอยู่ระหว่างดำเนินการ',
+            size: 'sm',
+            color: '#6B7280',
+            align: 'center',
+            wrap: true,
+          },
         ],
       },
     },
   }
 }
 
-export async function replyMessage(replyToken: string, messages: object[], accessToken: string) {
-  const res = await fetch('https://api.line.me/v2/bot/message/reply', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ replyToken, messages }),
-  })
-  if (!res.ok) console.error('[replyMessage] error:', await res.json())
+// ============================================
+// Reply Message
+// ============================================
+
+export async function replyMessage(
+  replyToken: string,
+  messages: object[],
+  accessToken: string
+) {
+  const res = await fetch(
+    'https://api.line.me/v2/bot/message/reply',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+
+        Authorization: `Bearer ${accessToken}`,
+      },
+
+      body: JSON.stringify({
+        replyToken,
+        messages,
+      }),
+    }
+  )
+
+  if (!res.ok) {
+    console.error(
+      '[replyMessage] error:',
+      await res.json()
+    )
+  }
+
   return res.ok
 }
