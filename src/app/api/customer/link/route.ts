@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
   if (!customer) {
     return NextResponse.json({
-      error: 'ไม่พบเบอร์โทรนี้ในระบบ — เบอร์โทรนี้ต้องเคยใช้บริการมาก่อน'
+      error: 'ไม่พบเบอร์โทรนี้ในระบบ กรุณากดจองคิว'
     }, { status: 404 })
   }
 

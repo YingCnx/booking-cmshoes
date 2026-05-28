@@ -436,7 +436,7 @@ export function buildNoQueueFlex() {
           {
             type: 'text',
             text:
-              'ตอนนี้ยังไม่มีรองเท้าอยู่ในร้าน',
+              'ไม่พบข้อมูลรองเท้าลูกค้า',
             size: 'sm',
             color: '#6B7280',
             align: 'center',
