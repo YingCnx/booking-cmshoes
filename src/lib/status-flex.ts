@@ -1,4 +1,3 @@
-
 // ============================================
 // Status Flex Messages — Clean Minimal UI
 // ============================================
@@ -16,152 +15,78 @@ export type StatusQueue = {
 // ============================================
 // Status Step
 // ============================================
-
 function getStatusStep(status: string) {
   switch (status) {
-    case 'รับเข้า':
-      return 1
-
-    case 'อยู่ระหว่างทำความสะอาด':
-      return 2
-
-    case 'เตรียมส่ง':
-      return 3
-
-    case 'กำลังจัดส่ง':
-      return 4
-
-    case 'จัดส่งสำเร็จ':
-      return 5
-
-    default:
-      return 1
+    case 'รับเข้า':                  return 1
+    case 'อยู่ระหว่างทำความสะอาด':    return 2
+    case 'เตรียมส่ง':                return 3
+    case 'กำลังจัดส่ง':              return 4
+    case 'จัดส่งสำเร็จ':             return 5
+    default:                         return 1
   }
 }
 
 // ============================================
 // Compact Row
 // ============================================
-
-function compactRow(
-  icon: string,
-  label: string,
-  value: string | number
-) {
-  const safe =
-    value === null ||
-    value === undefined ||
-    value === ''
-      ? '-'
-      : String(value)
-
+function compactRow(icon: string, label: string, value: string | number) {
+  const safe = value === null || value === undefined || value === '' ? '-' : String(value)
   return {
     type: 'box',
     layout: 'horizontal',
     margin: 'md',
-
     contents: [
-      {
-        type: 'text',
-        text: String(icon),
-        size: 'sm',
-        flex: 1,
-        color: '#6B7280',
-      },
-
-      {
-        type: 'text',
-        text: String(label),
-        size: 'sm',
-        color: '#6B7280',
-        flex: 3,
-      },
-
-      {
-        type: 'text',
-        text: safe,
-        size: 'sm',
-        color: '#111827',
-        weight: 'bold',
-        align: 'end',
-        flex: 4,
-        wrap: true,
-      },
+      { type: 'text', text: String(icon), size: 'sm', flex: 1, color: '#6B7280' },
+      { type: 'text', text: String(label), size: 'sm', color: '#6B7280', flex: 3 },
+      { type: 'text', text: safe, size: 'sm', color: '#111827', weight: 'bold', align: 'end', flex: 4, wrap: true },
     ],
   }
 }
 
 // ============================================
-// Progress Bar
+// Progress Bar — 5 ขั้น ตรงกับ DB
 // ============================================
-
 function progressBar(step: number) {
-  const labels = [
-    'รับแล้ว',
-    'ทำความสะอาด',
-    'เตรียมส่ง',
-    'กำลังส่ง',
-    'สำเร็จ',
-  ]
+  const labels = ['รับเข้า', 'ทำความสะอาด', 'เตรียมส่ง', 'กำลังส่ง', 'สำเร็จ']
 
   return {
     type: 'box',
     layout: 'vertical',
     spacing: 'sm',
-
     contents: [
       {
         type: 'box',
         layout: 'horizontal',
-
-        contents: labels.map(
-          (_, index) => ({
-            type: 'box',
-            layout: 'vertical',
-            flex: 1,
-            alignItems: 'center',
-
-            contents: [
-              {
-                type: 'box',
-                layout: 'vertical',
-
-                width: '14px',
-                height: '14px',
-
-                cornerRadius: '100px',
-
-                backgroundColor:
-                  index + 1 <= step
-                    ? '#1877F2'
-                    : '#D1D5DB',
-
-                contents: [
-                  {
-                    type: 'filler',
-                  },
-                ],
-              },
-            ],
-          })
-        ),
+        contents: labels.map((_, index) => ({
+          type: 'box',
+          layout: 'vertical',
+          flex: 1,
+          alignItems: 'center',
+          contents: [
+            {
+              type: 'box',
+              layout: 'vertical',
+              width: '14px',
+              height: '14px',
+              cornerRadius: '100px',
+              backgroundColor: index + 1 <= step ? '#1877F2' : '#D1D5DB',
+              contents: [{ type: 'filler' }],
+            },
+          ],
+        })),
       },
-
       {
         type: 'box',
         layout: 'horizontal',
-
-        contents: labels.map(
-          (label) => ({
-            type: 'text',
-            text: String(label),
-            size: 'xxs',
-            color: '#374151',
-            align: 'center',
-            flex: 1,
-            wrap: true,
-          })
-        ),
+        contents: labels.map((label) => ({
+          type: 'text',
+          text: String(label),
+          size: 'xxs',
+          color: '#374151',
+          align: 'center',
+          flex: 1,
+          wrap: true,
+        })),
       },
     ],
   }
@@ -170,85 +95,61 @@ function progressBar(step: number) {
 // ============================================
 // Queue Bubble
 // ============================================
-
-export function buildQueueBubble(
-  q: StatusQueue
-) {
+export function buildQueueBubble(q: StatusQueue) {
   const step = getStatusStep(q.status)
 
   const receivedLabel = q.received_date
-    ? new Date(
-        q.received_date
-      ).toLocaleDateString('th-TH', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
+    ? new Date(q.received_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
     : '-'
 
   const deliveryLabel = q.delivery_date
-    ? new Date(
-        q.delivery_date
-      ).toLocaleDateString('th-TH', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
+    ? new Date(q.delivery_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
     : '-'
+
+  // ✅ แก้ operator precedence — ใช้ queue_number ถ้ามี ไม่งั้น fallback #id
+  const queueLabel = q.queue_number ? `คิว #${q.queue_number}` : `คิว #${q.id}`
 
   return {
     type: 'bubble',
-
     size: 'mega',
-
     styles: {
-      body: {
-        backgroundColor: '#FFFFFF',
-      },
+      body: { backgroundColor: '#FFFFFF' },
     },
-
     body: {
       type: 'box',
       layout: 'vertical',
-
       paddingAll: '20px',
       spacing: 'lg',
-
       contents: [
         {
           type: 'box',
           layout: 'horizontal',
-
           contents: [
             {
               type: 'text',
-              text: String(`คิว #CM-`+
-                q.queue_number || `#${q.id}`
-              ),
+              text: queueLabel,
               size: 'sm',
               color: '#6B7280',
               weight: 'bold',
+              gravity: 'center',
+              flex: 1,
             },
-
             {
               type: 'box',
               layout: 'vertical',
-
               backgroundColor: '#12c1de',
-
               cornerRadius: '20px',
-
-              paddingStart: '10px',
-              paddingEnd: '10px',
-              paddingTop: '4px',
-              paddingBottom: '4px',
-
+              paddingStart: '12px',
+              paddingEnd: '12px',
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              flex: 0,
               contents: [
                 {
                   type: 'text',
                   text: String(q.status || '-'),
                   size: 'xs',
-                  color: '#111827',
+                  color: '#FFFFFF',
                   weight: 'bold',
                   align: 'center',
                 },
@@ -256,44 +157,18 @@ export function buildQueueBubble(
             },
           ],
         },
-
         {
           type: 'text',
-          text: String(
-            `${q.item_count || 0} คู่`
-          ),
+          text: String(`${q.item_count || 0} คู่`),
           size: '3xl',
           weight: 'bold',
           color: '#111827',
         },
-
         progressBar(step),
-
-        {
-          type: 'separator',
-          margin: 'lg',
-          color: '#E5E7EB',
-        },
-
-        compactRow(
-          '📅',
-          'วันที่รับ',
-          receivedLabel
-        ),
-
-        compactRow(
-          '⏱',
-          'กำหนดส่ง',
-          deliveryLabel
-        ),
-
-        compactRow(
-          '💵',
-          'ยอดรวม',
-          q.total_price
-            ? `฿${q.total_price.toLocaleString()}`
-            : '-'
-        ),
+        { type: 'separator', margin: 'lg', color: '#E5E7EB' },
+        compactRow('📅', 'วันที่รับ', receivedLabel),
+        compactRow('🚚', 'กำหนดส่ง', deliveryLabel),
+        compactRow('💵', 'ยอดรวม', q.total_price ? `฿${q.total_price.toLocaleString()}` : '-'),
       ],
     },
   }
@@ -302,90 +177,51 @@ export function buildQueueBubble(
 // ============================================
 // Carousel
 // ============================================
+export function buildStatusCarouselFlex(queues: StatusQueue[]) {
+  if (!queues || queues.length === 0) return null
 
-export function buildStatusCarouselFlex(
-  queues: StatusQueue[]
-) {
-  if (!queues || queues.length === 0) {
-    return null
-  }
-
-  const bubbles = queues
-    .slice(0, 12)
-    .map(buildQueueBubble)
+  const bubbles = queues.slice(0, 12).map(buildQueueBubble)
 
   if (bubbles.length === 1) {
-    return {
-      type: 'flex',
-      altText: 'สถานะรองเท้าของคุณ',
-      contents: bubbles[0],
-    }
+    return { type: 'flex', altText: 'สถานะรองเท้าของคุณ', contents: bubbles[0] }
   }
 
   return {
     type: 'flex',
     altText: `สถานะรองเท้า ${queues.length} รายการ`,
-    contents: {
-      type: 'carousel',
-      contents: bubbles,
-    },
+    contents: { type: 'carousel', contents: bubbles },
   }
 }
 
 // ============================================
 // Link Account
 // ============================================
-
-export function buildLinkAccountFlex(
-  liffUrl: string
-) {
+export function buildLinkAccountFlex(liffUrl: string) {
   return {
     type: 'flex',
-
-    altText:
-      'ผูกบัญชีก่อนเช็คสถานะ',
-
+    altText: 'ผูกบัญชีก่อนเช็คสถานะ',
     contents: {
       type: 'bubble',
-
       size: 'mega',
-
       body: {
         type: 'box',
         layout: 'vertical',
-
         paddingAll: '24px',
-
         spacing: 'lg',
-
         contents: [
+          { type: 'text', text: 'ยังไม่ได้ผูกบัญชี', size: 'xl', weight: 'bold', color: '#111827' },
           {
             type: 'text',
-            text: 'ยังไม่ได้ผูกบัญชี',
-            size: 'xl',
-            weight: 'bold',
-            color: '#111827',
-          },
-
-          {
-            type: 'text',
-            text:
-              'กรุณาผูกบัญชีด้วยเบอร์โทรที่เคยใช้บริการ เพื่อเช็คสถานะรองเท้า',
+            text: 'กรุณาผูกบัญชีด้วยเบอร์โทรที่เคยใช้บริการ เพื่อเช็คสถานะรองเท้า',
             size: 'sm',
             color: '#6B7280',
             wrap: true,
           },
-
           {
             type: 'button',
             style: 'primary',
             color: '#111827',
-
-            action: {
-              type: 'uri',
-              label: 'ผูกบัญชี',
-              uri: liffUrl,
-            },
+            action: { type: 'uri', label: 'ผูกบัญชี', uri: liffUrl },
           },
         ],
       },
@@ -396,52 +232,22 @@ export function buildLinkAccountFlex(
 // ============================================
 // No Queue
 // ============================================
-
 export function buildNoQueueFlex() {
   return {
     type: 'flex',
-
     altText: 'ยังไม่มีรายการ',
-
     contents: {
       type: 'bubble',
-
       size: 'mega',
-
       body: {
         type: 'box',
         layout: 'vertical',
-
         paddingAll: '28px',
-
         spacing: 'md',
-
         contents: [
-          {
-            type: 'text',
-            text: '📦',
-            size: '4xl',
-            align: 'center',
-          },
-
-          {
-            type: 'text',
-            text: 'ยังไม่มีรายการ',
-            size: 'lg',
-            weight: 'bold',
-            align: 'center',
-            color: '#111827',
-          },
-
-          {
-            type: 'text',
-            text:
-              'ไม่พบข้อมูลรองเท้าลูกค้า',
-            size: 'sm',
-            color: '#6B7280',
-            align: 'center',
-            wrap: true,
-          },
+          { type: 'text', text: '📦', size: '4xl', align: 'center' },
+          { type: 'text', text: 'ยังไม่มีรายการ', size: 'lg', weight: 'bold', align: 'center', color: '#111827' },
+          { type: 'text', text: 'ไม่พบข้อมูลรองเท้าลูกค้า', size: 'sm', color: '#6B7280', align: 'center', wrap: true },
         ],
       },
     },
@@ -451,37 +257,15 @@ export function buildNoQueueFlex() {
 // ============================================
 // Reply Message
 // ============================================
-
-export async function replyMessage(
-  replyToken: string,
-  messages: object[],
-  accessToken: string
-) {
-  const res = await fetch(
-    'https://api.line.me/v2/bot/message/reply',
-    {
-      method: 'POST',
-
-      headers: {
-        'Content-Type':
-          'application/json',
-
-        Authorization: `Bearer ${accessToken}`,
-      },
-
-      body: JSON.stringify({
-        replyToken,
-        messages,
-      }),
-    }
-  )
-
-  if (!res.ok) {
-    console.error(
-      '[replyMessage] error:',
-      await res.json()
-    )
-  }
-
+export async function replyMessage(replyToken: string, messages: object[], accessToken: string) {
+  const res = await fetch('https://api.line.me/v2/bot/message/reply', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ replyToken, messages }),
+  })
+  if (!res.ok) console.error('[replyMessage] error:', await res.json())
   return res.ok
 }
