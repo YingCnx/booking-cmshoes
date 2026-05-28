@@ -7,6 +7,7 @@ export type StatusQueue = {
   status: string
   queue_number: string | null
   received_date: string | null
+  total_pairs: number | null
   total_price: number | null
   delivery_date: string | null
   item_count: number
@@ -159,7 +160,7 @@ export function buildQueueBubble(q: StatusQueue) {
         },
         {
           type: 'text',
-          text: String(`${q.item_count || 0} คู่`),
+          text: String(`${q.total_pairs || 0} คู่`),
           size: '3xl',
           weight: 'bold',
           color: '#111827',

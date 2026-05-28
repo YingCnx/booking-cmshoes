@@ -88,7 +88,7 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
   const { data: queues } = await supabase
     .from('queue')
     .select(`
-      id, status, queue_number, received_date, total_price, delivery_date,
+      id, status, queue_number, received_date, total_pairs, total_price, delivery_date,
       queue_items ( id )
     `)
     .eq('customer_id', customer.id)
@@ -107,6 +107,7 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     status: q.status,
     queue_number: q.queue_number,
     received_date: q.received_date,
+    total_pairs: q.total_pairs,
     total_price: q.total_price,
     delivery_date: q.delivery_date,
     item_count: q.queue_items?.length ?? 0,
