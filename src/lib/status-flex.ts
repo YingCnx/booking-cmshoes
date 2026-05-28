@@ -56,6 +56,11 @@ export function buildQueueBubble(q: StatusQueue) {
     ? new Date(q.delivery_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
     : null
 
+  // ✅ guard ทุก string ให้แน่ใจว่ามีค่า
+  const queueLabel = String(q.queue_number || `Queue #${q.id}`)
+  const itemLabel = `${q.item_count || 0} คู่`
+  const statusLabel = String(q.status || '-')
+
   return {
     type: 'bubble',
     size: 'kilo',
@@ -67,18 +72,18 @@ export function buildQueueBubble(q: StatusQueue) {
       contents: [
         {
           type: 'text',
-          text: q.queue_number ?? `Queue #${q.id}`,
+          text: queueLabel,
           color: '#9CA3AF',
-          size: 'xxs',
+          size: 'xs',
           weight: 'bold',
         },
         {
           type: 'text',
-          text: `${q.item_count} คู่`,
+          text: itemLabel,
           color: '#FFFFFF',
           size: 'lg',
           weight: 'bold',
-          margin: 'xs',
+          margin: 'sm',
         },
       ],
     },
@@ -89,25 +94,14 @@ export function buildQueueBubble(q: StatusQueue) {
       spacing: 'sm',
       contents: [
         {
-          type: 'box',
-          layout: 'horizontal',
-          contents: [
-            { type: 'text', text: style.icon, size: 'sm', flex: 0 },
-            { type: 'text', text: q.status, size: 'sm', weight: 'bold', color: '#1C1C1E', margin: 'sm', flex: 1, wrap: true },
-          ],
+          type: 'text',
+          text: `${style.icon} ${statusLabel}`,
+          size: 'sm',
+          weight: 'bold',
+          color: '#1C1C1E',
+          wrap: true,
         },
         progressBar(style.step),
-        {
-          type: 'box',
-          layout: 'horizontal',
-          contents: [
-            { type: 'text', text: 'รับเข้า',   size: 'xxs', color: '#9CA3AF', align: 'start',  flex: 1 },
-            { type: 'text', text: 'ซัก',       size: 'xxs', color: '#9CA3AF', align: 'center', flex: 1 },
-            { type: 'text', text: 'เตรียมส่ง', size: 'xxs', color: '#9CA3AF', align: 'center', flex: 1 },
-            { type: 'text', text: 'จัดส่ง',    size: 'xxs', color: '#9CA3AF', align: 'center', flex: 1 },
-            { type: 'text', text: 'สำเร็จ',    size: 'xxs', color: '#9CA3AF', align: 'end',    flex: 1 },
-          ],
-        },
         { type: 'separator', margin: 'md' },
         compactRow('เข้ารับ', receivedLabel),
         ...(deliveryLabel ? [compactRow('นัดส่ง', deliveryLabel)] : []),
