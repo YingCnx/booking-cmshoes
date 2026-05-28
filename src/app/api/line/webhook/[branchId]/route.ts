@@ -43,16 +43,21 @@ export async function POST(req: Request, { params }: Props) {
   const events = body.events ?? []
 
   for (const event of events) {
+    // ✅ ดึง trigger จากทั้ง 2 ทาง:
+    //   1. postback.data
+    //   2. message.text (กรณี Manager ไม่มี postback)
+    const trigger =
+      event.postback?.data ??
+      (event.type === 'message' && event.message?.type === 'text' ? event.message.text : null)
+
     console.log(`[webhook ${branch.name}]`, {
       type: event.type,
-      source: event.source?.type,
       userId: event.source?.userId ?? '-',
       groupId: event.source?.groupId ?? '-',
-      data: event.postback?.data,
+      trigger,
     })
 
-    // ✅ Postback action — 'check_status'
-    if (event.type === 'postback' && event.postback?.data === 'check_status') {
+    if (trigger === 'เช็คสถานะ') {
       await handleCheckStatus(event, branch, supabase)
     }
   }
@@ -65,7 +70,6 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
   const replyToken = event.replyToken
   if (!lineUserId || !replyToken || !branch.line_access_token) return
 
-  // หา customer
   const { data: customer } = await supabase
     .from('customers')
     .select('id, name')
@@ -78,15 +82,10 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     const liffUrl = branch.line_liff_id
       ? `https://liff.line.me/${branch.line_liff_id}?next=/status`
       : `${process.env.NEXT_PUBLIC_SITE_URL}/status`
-    await replyMessage(
-      replyToken,
-      [buildLinkAccountFlex(liffUrl)],
-      branch.line_access_token
-    )
+    await replyMessage(replyToken, [buildLinkAccountFlex(liffUrl)], branch.line_access_token)
     return
   }
 
-  // ดึง queue ของ customer
   const { data: queues } = await supabase
     .from('queue')
     .select(`
@@ -97,17 +96,11 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     .in('status', ACTIVE_QUEUE_STATUSES as any)
     .order('created_at', { ascending: false })
 
-  // กรณี 2: ไม่มี queue
   if (!queues || queues.length === 0) {
-    await replyMessage(
-      replyToken,
-      [buildNoQueueFlex()],
-      branch.line_access_token
-    )
+    await replyMessage(replyToken, [buildNoQueueFlex()], branch.line_access_token)
     return
   }
 
-  // กรณี 3: มี queue → ส่ง carousel
   const statusQueues: StatusQueue[] = queues.map((q: any) => ({
     id: q.id,
     status: q.status,
