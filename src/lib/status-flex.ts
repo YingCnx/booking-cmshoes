@@ -222,7 +222,7 @@ export function buildQueueBubble(
           contents: [
             {
               type: 'text',
-              text: String(
+              text: String(`คิว #CM-`+
                 q.queue_number || `#${q.id}`
               ),
               size: 'sm',
