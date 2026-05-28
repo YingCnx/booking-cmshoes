@@ -38,14 +38,10 @@ export default async function ConfirmPage({ searchParams }: Props) {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 
-  // prefill ข้อมูลจากลูกค้าเก่า (ถ้ามี)
-  let defaultName  = session.displayName ?? ''
-  let defaultPhone = ''
-
-  if (existing) {
-    defaultName  = existing.name  ?? defaultName
-    defaultPhone = existing.phone ?? ''
-  }
+  // ✅ prefill — ถ้าเจอ customer แล้ว ใช้ค่าจาก DB
+  // ถ้าไม่เจอ ใช้ displayName จาก LINE เป็นชื่อ
+  const defaultName  = existing?.name  ?? session.displayName ?? ''
+  const defaultPhone = existing?.phone ?? ''
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -82,6 +78,13 @@ export default async function ConfirmPage({ searchParams }: Props) {
               <div className="text-xs font-medium text-green-700">เชื่อมต่อ LINE แล้ว</div>
               <div className="text-sm font-semibold text-green-900">{session.displayName}</div>
             </div>
+          </div>
+        )}
+
+        {existing?.phone && (
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 text-sm text-blue-800">
+            <span className="text-base leading-none">✓</span>
+            <span>ระบบดึงข้อมูลที่เคยใช้บริการมาให้แล้ว — สามารถแก้ไขได้</span>
           </div>
         )}
 
