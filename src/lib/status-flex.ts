@@ -40,76 +40,6 @@ function getStatusStep(status: string) {
 }
 
 // ============================================
-// Status Label
-// ============================================
-
-function getStatusLabel(status: string) {
-  switch (status) {
-    case 'received':
-      return 'รับเข้า'
-
-    case 'cleaning':
-      return 'ทำความสะอาด'
-
-    case 'repairing':
-      return 'พร้อมส่ง'
-
-    case 'ready':
-      return 'กำลังจัดส่ง'
-
-    case 'completed':
-      return 'เสร็จสิ้น'
-
-    default:
-      return status
-  }
-}
-
-// ============================================
-// Status Color
-// ============================================
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'received':
-      return {
-        bg: '#E8F1FF',
-        text: '#1877F2',
-      }
-
-    case 'cleaning':
-      return {
-        bg: '#EAFBF1',
-        text: '#16A34A',
-      }
-
-    case 'repairing':
-      return {
-        bg: '#FFF4E5',
-        text: '#F59E0B',
-      }
-
-    case 'ready':
-      return {
-        bg: '#F3E8FF',
-        text: '#9333EA',
-      }
-
-    case 'completed':
-      return {
-        bg: '#F3F4F6',
-        text: '#374151',
-      }
-
-    default:
-      return {
-        bg: '#F3F4F6',
-        text: '#374151',
-      }
-  }
-}
-
-// ============================================
 // Compact Row
 // ============================================
 
@@ -133,7 +63,7 @@ function compactRow(
     contents: [
       {
         type: 'text',
-        text: icon,
+        text: String(icon),
         size: 'sm',
         flex: 1,
         color: '#6B7280',
@@ -141,7 +71,7 @@ function compactRow(
 
       {
         type: 'text',
-        text: label,
+        text: String(label),
         size: 'sm',
         color: '#6B7280',
         flex: 3,
@@ -155,6 +85,7 @@ function compactRow(
         weight: 'bold',
         align: 'end',
         flex: 4,
+        wrap: true,
       },
     ],
   }
@@ -168,9 +99,9 @@ function progressBar(step: number) {
   const labels = [
     'รับแล้ว',
     'ทำความสะอาด',
-    'ซ่อมแซม',
     'เตรียมส่ง',
-    'เสร็จสิ้น',
+    'กำลังส่ง',
+    'สำเร็จ',
   ]
 
   return {
@@ -182,46 +113,55 @@ function progressBar(step: number) {
       {
         type: 'box',
         layout: 'horizontal',
-        contents: labels.map((_, index) => ({
-          type: 'box',
-          layout: 'vertical',
-          flex: 1,
-          alignItems: 'center',
 
-          contents: [
-            {
-              type: 'box',
-              layout: 'vertical',
-              width: '14px',
-              height: '14px',
-              cornerRadius: '100px',
-              backgroundColor:
-                index + 1 <= step
-                  ? '#1877F2'
-                  : '#D1D5DB',
+        contents: labels.map(
+          (_, index) => ({
+            type: 'box',
+            layout: 'vertical',
+            flex: 1,
+            alignItems: 'center',
 
-              contents: [
-                {
-                  type: 'filler',
-                },
-              ],
-            },
-          ],
-        })),
+            contents: [
+              {
+                type: 'box',
+                layout: 'vertical',
+
+                width: '14px',
+                height: '14px',
+
+                cornerRadius: '100px',
+
+                backgroundColor:
+                  index + 1 <= step
+                    ? '#1877F2'
+                    : '#D1D5DB',
+
+                contents: [
+                  {
+                    type: 'filler',
+                  },
+                ],
+              },
+            ],
+          })
+        ),
       },
 
       {
         type: 'box',
         layout: 'horizontal',
-        contents: labels.map((label) => ({
-          type: 'text',
-          text: label,
-          size: 'xxs',
-          color: '#374151',
-          align: 'center',
-          flex: 1,
-          wrap: true,
-        })),
+
+        contents: labels.map(
+          (label) => ({
+            type: 'text',
+            text: String(label),
+            size: 'xxs',
+            color: '#374151',
+            align: 'center',
+            flex: 1,
+            wrap: true,
+          })
+        ),
       },
     ],
   }
@@ -235,14 +175,6 @@ export function buildQueueBubble(
   q: StatusQueue
 ) {
   const step = getStatusStep(q.status)
-
-  const statusLabel = getStatusLabel(
-    q.status
-  )
-
-  const statusColor = getStatusColor(
-    q.status
-  )
 
   const receivedLabel = q.received_date
     ? new Date(
@@ -280,11 +212,9 @@ export function buildQueueBubble(
       layout: 'vertical',
 
       paddingAll: '20px',
-
       spacing: 'lg',
 
       contents: [
-        // Header
         {
           type: 'box',
           layout: 'horizontal',
@@ -292,21 +222,19 @@ export function buildQueueBubble(
           contents: [
             {
               type: 'text',
-              text:
-                q.queue_number ||
-                `#${q.id}`,
+              text: String(
+                q.queue_number || `#${q.id}`
+              ),
               size: 'sm',
               color: '#6B7280',
               weight: 'bold',
-              flex: 1,
             },
 
             {
               type: 'box',
               layout: 'vertical',
 
-              backgroundColor:
-                statusColor.bg,
+              backgroundColor: '#F3F4F6',
 
               cornerRadius: '20px',
 
@@ -318,9 +246,9 @@ export function buildQueueBubble(
               contents: [
                 {
                   type: 'text',
-                  text: statusLabel,
+                  text: String(q.status || '-'),
                   size: 'xs',
-                  color: statusColor.text,
+                  color: '#111827',
                   weight: 'bold',
                   align: 'center',
                 },
@@ -329,26 +257,24 @@ export function buildQueueBubble(
           ],
         },
 
-        // Item Count
         {
           type: 'text',
-          text: `${q.item_count || 0} คู่`,
+          text: String(
+            `${q.item_count || 0} คู่`
+          ),
           size: '3xl',
           weight: 'bold',
           color: '#111827',
         },
 
-        // Progress
         progressBar(step),
 
-        // Divider
         {
           type: 'separator',
           margin: 'lg',
           color: '#E5E7EB',
         },
 
-        // Detail
         compactRow(
           '📅',
           'วันที่รับ',
