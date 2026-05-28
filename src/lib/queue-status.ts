@@ -18,6 +18,7 @@ export const ACTIVE_QUEUE_STATUSES: QueueStatus[] = [
   'อยู่ระหว่างทำความสะอาด',
   'เตรียมส่ง',
   'กำลังจัดส่ง',
+  'จัดส่งสำเร็จ',
 ]
 
 // สี + icon ของแต่ละ status

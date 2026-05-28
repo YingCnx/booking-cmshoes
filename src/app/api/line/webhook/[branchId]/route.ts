@@ -94,7 +94,9 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     .eq('customer_id', customer.id)
     .in('status', ACTIVE_QUEUE_STATUSES as any)
     .order('received_date', { ascending: false })
-
+    .limit(1)
+    .single()
+    
   console.log('[handleCheckStatus] customer:', customer.id, 'queues:', queues?.length ?? 0)
 
   if (!queues || queues.length === 0) {
