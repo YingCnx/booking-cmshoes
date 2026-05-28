@@ -234,7 +234,7 @@ export function buildQueueBubble(
               type: 'box',
               layout: 'vertical',
 
-              backgroundColor: '#2263e6',
+              backgroundColor: '#12c1de',
 
               cornerRadius: '20px',
 
