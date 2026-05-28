@@ -30,11 +30,11 @@ type StatusStyle = {
 }
 
 export const STATUS_STYLE: Record<string, StatusStyle> = {
-  'รับเข้า':              { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200',  icon: '📥', step: 1 },
-  'กำลังทำความสะอาด':     { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200',   icon: '🧼', step: 2 },
-  'เตรียมส่ง':            { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', icon: '📦', step: 3 },
-  'กำลังจัดส่ง':          { bg: 'bg-cyan-50',   text: 'text-cyan-700',   border: 'border-cyan-200',   icon: '🚚', step: 4 },
-  'จัดส่งสำเร็จ':         { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: '✅', step: 5 },
+  'รับเข้า':                { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200',  icon: '📥', step: 1 },
+  'อยู่ระหว่างทำความสะอาด':  { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200',   icon: '🧼', step: 2 },
+  'เตรียมส่ง':              { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', icon: '📦', step: 3 },
+  'กำลังจัดส่ง':            { bg: 'bg-cyan-50',   text: 'text-cyan-700',   border: 'border-cyan-200',   icon: '🚚', step: 4 },
+  'จัดส่งสำเร็จ':           { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: '✅', step: 5 },
 }
 
 export function getStatusStyle(status: string): StatusStyle {

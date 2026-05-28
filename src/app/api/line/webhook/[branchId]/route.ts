@@ -43,9 +43,6 @@ export async function POST(req: Request, { params }: Props) {
   const events = body.events ?? []
 
   for (const event of events) {
-    // ✅ ดึง trigger จากทั้ง 2 ทาง:
-    //   1. postback.data
-    //   2. message.text (กรณี Manager ไม่มี postback)
     const trigger =
       event.postback?.data ??
       (event.type === 'message' && event.message?.type === 'text' ? event.message.text : null)
@@ -53,11 +50,10 @@ export async function POST(req: Request, { params }: Props) {
     console.log(`[webhook ${branch.name}]`, {
       type: event.type,
       userId: event.source?.userId ?? '-',
-      groupId: event.source?.groupId ?? '-',
       trigger,
     })
 
-    if (trigger === 'เช็คสถานะ') {
+    if (trigger === 'เช็คสถานะ' || trigger === 'check_status') {
       await handleCheckStatus(event, branch, supabase)
     }
   }
@@ -70,6 +66,7 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
   const replyToken = event.replyToken
   if (!lineUserId || !replyToken || !branch.line_access_token) return
 
+  // หา customer
   const { data: customer } = await supabase
     .from('customers')
     .select('id, name')
@@ -77,7 +74,7 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     .eq('branch_id', branch.id)
     .maybeSingle()
 
-  // กรณี 1: ไม่เจอ customer → ขอผูกบัญชีก่อน
+  // กรณี 1: ไม่เจอ customer
   if (!customer) {
     const liffUrl = branch.line_liff_id
       ? `https://liff.line.me/${branch.line_liff_id}?next=/status`
@@ -86,15 +83,19 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     return
   }
 
+  // ✅ ใช้ column ที่ถูกต้องตาม schema:
+  //    received_date, total_price, delivery_date
   const { data: queues } = await supabase
     .from('queue')
     .select(`
-      id, status, queue_number, created_at, total_amount, due_date,
+      id, status, queue_number, received_date, total_price, delivery_date,
       queue_items ( id )
     `)
     .eq('customer_id', customer.id)
     .in('status', ACTIVE_QUEUE_STATUSES as any)
-    .order('created_at', { ascending: false })
+    .order('received_date', { ascending: false })
+
+  console.log('[handleCheckStatus] customer:', customer.id, 'queues:', queues?.length ?? 0)
 
   if (!queues || queues.length === 0) {
     await replyMessage(replyToken, [buildNoQueueFlex()], branch.line_access_token)
@@ -105,9 +106,9 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     id: q.id,
     status: q.status,
     queue_number: q.queue_number,
-    created_at: q.created_at,
-    total_amount: q.total_amount,
-    due_date: q.due_date,
+    received_date: q.received_date,
+    total_price: q.total_price,
+    delivery_date: q.delivery_date,
     item_count: q.queue_items?.length ?? 0,
   }))
 

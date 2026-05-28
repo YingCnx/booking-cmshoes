@@ -14,14 +14,12 @@ export default async function StatusPage() {
 
   const supabase = await createClient()
 
-  // 1. หา customer ด้วย line_user_id
   const { data: customer } = await supabase
     .from('customers')
     .select('id, name, phone, customer_code, branch_id')
     .eq('line_user_id', session.lineUserId)
     .maybeSingle()
 
-  // ถ้ายังไม่มี → ให้กรอกเบอร์โทร
   if (!customer) {
     return (
       <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -41,16 +39,16 @@ export default async function StatusPage() {
     )
   }
 
-  // 2. ดึง queue ของลูกค้า (ที่ไม่ใช่ จัดส่งสำเร็จ)
+  // ✅ ใช้ received_date, total_price, delivery_date
   const { data: activeQueues } = await supabase
     .from('queue')
     .select(`
-      id, status, queue_number, created_at, total_amount, due_date,
+      id, status, queue_number, received_date, total_price, delivery_date,
       queue_items ( id )
     `)
     .eq('customer_id', customer.id)
     .in('status', ACTIVE_QUEUE_STATUSES as any)
-    .order('created_at', { ascending: false })
+    .order('received_date', { ascending: false })
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -58,7 +56,6 @@ export default async function StatusPage() {
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
 
-        {/* Customer info */}
         <div className="bg-white rounded-3xl border border-gray-100 px-5 py-4 shadow-sm">
           <div className="text-xs text-gray-400 uppercase tracking-wider">ลูกค้า</div>
           <div className="font-bold text-gray-900 mt-1">{customer.name}</div>
@@ -67,7 +64,6 @@ export default async function StatusPage() {
           )}
         </div>
 
-        {/* Active queues */}
         <div>
           <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">
             กำลังดำเนินการ
@@ -75,7 +71,6 @@ export default async function StatusPage() {
           <QueueList queues={activeQueues ?? []} />
         </div>
 
-        {/* CTA */}
         <Link href="/service"
           className="block bg-gray-900 text-white rounded-2xl px-5 py-4 text-center text-sm font-bold active:scale-[0.99] transition">
           + จองคิวใหม่

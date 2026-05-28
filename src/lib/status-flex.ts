@@ -8,13 +8,12 @@ export type StatusQueue = {
   id: number
   status: string
   queue_number: string | null
-  created_at: string | null
-  total_amount: number | null
-  due_date: string | null
+  received_date: string | null
+  total_price: number | null
+  delivery_date: string | null
   item_count: number
 }
 
-// ✅ helper — แถวในกล่อง
 function compactRow(label: string, value: string | number) {
   const safe = value === null || value === undefined || value === '' ? '-' : String(value)
   return {
@@ -27,7 +26,6 @@ function compactRow(label: string, value: string | number) {
   }
 }
 
-// สร้าง progress bar 5 ขั้นเป็น box
 function progressBar(currentStep: number) {
   const steps = []
   for (let i = 1; i <= 5; i++) {
@@ -49,14 +47,13 @@ function progressBar(currentStep: number) {
   }
 }
 
-// 1. Bubble แสดง queue 1 อัน
 export function buildQueueBubble(q: StatusQueue) {
   const style = getStatusStyle(q.status)
-  const dateLabel = q.created_at
-    ? new Date(q.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
+  const receivedLabel = q.received_date
+    ? new Date(q.received_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
     : '-'
-  const dueLabel = q.due_date
-    ? new Date(q.due_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
+  const deliveryLabel = q.delivery_date
+    ? new Date(q.delivery_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
     : null
 
   return {
@@ -91,18 +88,15 @@ export function buildQueueBubble(q: StatusQueue) {
       paddingAll: '12px',
       spacing: 'sm',
       contents: [
-        // Status badge
         {
           type: 'box',
           layout: 'horizontal',
           contents: [
             { type: 'text', text: style.icon, size: 'sm', flex: 0 },
-            { type: 'text', text: q.status, size: 'sm', weight: 'bold', color: '#1C1C1E', margin: 'sm', flex: 1 },
+            { type: 'text', text: q.status, size: 'sm', weight: 'bold', color: '#1C1C1E', margin: 'sm', flex: 1, wrap: true },
           ],
         },
-        // Progress
         progressBar(style.step),
-        // Labels under progress
         {
           type: 'box',
           layout: 'horizontal',
@@ -115,19 +109,16 @@ export function buildQueueBubble(q: StatusQueue) {
           ],
         },
         { type: 'separator', margin: 'md' },
-        compactRow('เข้ารับ', dateLabel),
-        ...(dueLabel ? [compactRow('รับกลับ', dueLabel)] : []),
-        ...(q.total_amount && q.total_amount > 0 ? [compactRow('ยอด', `฿${q.total_amount.toLocaleString()}`)] : []),
+        compactRow('เข้ารับ', receivedLabel),
+        ...(deliveryLabel ? [compactRow('นัดส่ง', deliveryLabel)] : []),
+        ...(q.total_price && q.total_price > 0 ? [compactRow('ยอด', `฿${q.total_price.toLocaleString()}`)] : []),
       ],
     },
   }
 }
 
-// 2. Carousel — แสดงหลาย queue
 export function buildStatusCarouselFlex(queues: StatusQueue[]) {
   if (queues.length === 0) return null
-
-  // LINE จำกัด carousel ที่ 12 bubbles
   const bubbles = queues.slice(0, 12).map(buildQueueBubble)
 
   if (bubbles.length === 1) {
@@ -137,7 +128,6 @@ export function buildStatusCarouselFlex(queues: StatusQueue[]) {
       contents: bubbles[0],
     }
   }
-
   return {
     type: 'flex',
     altText: `สถานะรองเท้า ${queues.length} รายการ`,
@@ -148,7 +138,6 @@ export function buildStatusCarouselFlex(queues: StatusQueue[]) {
   }
 }
 
-// 3. Flex แจ้งว่ายังไม่ผูกบัญชี + ปุ่มผูก
 export function buildLinkAccountFlex(liffUrl: string) {
   return {
     type: 'flex',
@@ -173,7 +162,7 @@ export function buildLinkAccountFlex(liffUrl: string) {
         contents: [
           {
             type: 'text',
-            text: 'กรุณาผูกบัญชี LINE กับเบอร์โทรที่เคยใช้บริการ เพื่อเช็คสถานะรองเท้า',
+            text: 'กรุณาผูกบัญชี LINE กับเบอร์โทรที่เคยใช้บริการ',
             size: 'sm',
             color: '#6B7280',
             wrap: true,
@@ -198,7 +187,6 @@ export function buildLinkAccountFlex(liffUrl: string) {
   }
 }
 
-// 4. Flex แจ้งยังไม่มีรายการ
 export function buildNoQueueFlex() {
   return {
     type: 'flex',
@@ -221,7 +209,6 @@ export function buildNoQueueFlex() {
   }
 }
 
-// ✅ reply API (ใช้ reply token จาก webhook event)
 export async function replyMessage(replyToken: string, messages: object[], accessToken: string) {
   const res = await fetch('https://api.line.me/v2/bot/message/reply', {
     method: 'POST',
@@ -231,8 +218,6 @@ export async function replyMessage(replyToken: string, messages: object[], acces
     },
     body: JSON.stringify({ replyToken, messages }),
   })
-  if (!res.ok) {
-    console.error('[replyMessage] error:', await res.json())
-  }
+  if (!res.ok) console.error('[replyMessage] error:', await res.json())
   return res.ok
 }
