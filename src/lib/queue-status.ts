@@ -4,7 +4,7 @@
 
 export const QUEUE_STATUSES = [
   'รับเข้า',
-  'กำลังทำความสะอาด',
+  'อยู่ระหว่างทำความสะอาด',
   'เตรียมส่ง',
   'กำลังจัดส่ง',
   'จัดส่งสำเร็จ',
@@ -15,7 +15,7 @@ export type QueueStatus = typeof QUEUE_STATUSES[number]
 // สถานะที่แสดงในหน้า /status (ไม่รวม จัดส่งสำเร็จ)
 export const ACTIVE_QUEUE_STATUSES: QueueStatus[] = [
   'รับเข้า',
-  'กำลังทำความสะอาด',
+  'อยู่ระหว่างทำความสะอาด',
   'เตรียมส่ง',
   'กำลังจัดส่ง',
 ]
