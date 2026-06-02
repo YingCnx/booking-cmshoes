@@ -91,7 +91,7 @@ return (
               2
             </div>
             <div className="text-xs mt-2 text-slate-600">
-              รับรองเท้า
+              เข้ารับรองเท้า
             </div>
           </div>
 
@@ -109,7 +109,7 @@ return (
               4
             </div>
             <div className="text-xs mt-2 text-slate-600">
-              ส่งคืน
+              จัดส่งคืน
             </div>
           </div>
 
@@ -131,7 +131,7 @@ return (
           <div className="flex gap-4 flex-1 min-w-0">
 
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center text-2xl flex-shrink-0">
-              👟
+              
             </div>
 
             <div className="min-w-0">
@@ -196,7 +196,7 @@ return (
           href="/service/pickup"
           className="block w-full text-center bg-[#2ABFAB] text-white py-4 rounded-2xl font-semibold shadow-lg"
         >
-          👟 จองคิวรับรองเท้า
+          จองคิวรับรองเท้า
         </SelectableLink>
 
       </div>
