@@ -26,16 +26,16 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   if (!raw) return null
   try {
     const s = JSON.parse(raw) as AdminSession
-    if (!s.lineUserId || !s.branchId || !s.groupId) return null
+    if (!s.lineUserId || !s.branchId) return null
 
     const supabase = await createClient()
     const { data: branch } = await supabase
       .from('branches')
-      .select('id, name, line_admin_group_id')
+      .select('id, name')
       .eq('id', s.branchId)
       .single()
 
-    if (!branch || branch.line_admin_group_id !== s.groupId) return null
+    if (!branch) return null
     return s
   } catch { return null }
 }
