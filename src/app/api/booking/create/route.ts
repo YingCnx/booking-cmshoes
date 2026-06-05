@@ -102,16 +102,14 @@ export async function POST(req: Request) {
       .maybeSingle()
 
     if (byPhone) {
-      // เบอร์เคยอยู่ในระบบ — update name + line_user_id (ถ้ายังไม่มี)
-      const updates: any = {
+      // เบอร์เคยอยู่ในระบบ — update name + line_user_id เสมอ
+      await supabase.from('customers').update({
         name,
+        phone,
+        line_user_id: session.lineUserId,
         line_display_name: session.displayName,
         updated_at: new Date().toISOString(),
-      }
-      if (!byPhone.line_user_id) {
-        updates.line_user_id = session.lineUserId
-      }
-      await supabase.from('customers').update(updates).eq('id', byPhone.id)
+      }).eq('id', byPhone.id)
       customer = byPhone
     } else {
       // ใหม่ทั้งหมด — INSERT
