@@ -2,8 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { getLineSession } from '@/lib/line-session'
 import { redirect } from 'next/navigation'
 import { SelectableLink } from '@/components/SelectableLink'
+import { BeforeAfterSlider } from './BeforeAfterSlider'
 
-export const revalidate = 60   // cache 1 นาที
+export const revalidate = 60
 
 export default async function ServicePage() {
   const session = await getLineSession()
@@ -24,185 +25,133 @@ export default async function ServicePage() {
     )
   }
 
-return (
-  <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+  return (
+    <main className="min-h-screen bg-white pb-32">
 
-    {/* Hero */}
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#102A56] via-[#163A6B] to-[#102A56] px-6 pt-12 pb-10">
+      {/* Before/After Slider */}
+      <section className="px-4 pt-5">
+        <BeforeAfterSlider
+          beforeSrc="/before.jpg"
+          afterSrc="/after.jpg"
+        />
+      </section>
 
-      {/* Background Glow */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      </div>
-
-      <div className="relative max-w-lg mx-auto">
-
-        <div className="text-xs uppercase tracking-[0.2em] text-slate-300 font-semibold">
-          {branch.name}
-        </div>
-
-        <h1 className="mt-3 text-3xl font-bold text-white leading-tight">
+      {/* Title + Stats */}
+      <section className="px-5 pt-6 text-center">
+        <h1 className="text-3xl font-extrabold text-gray-900 leading-tight">
           จองคิวซักรองเท้า
         </h1>
-
-        <p className="mt-2 text-slate-300">
-          รับ-ส่งฟรีถึงบ้าน สะดวก ไม่ต้องเดินทาง
+        <p className="mt-2 text-[#2ABFAB] font-semibold text-base">
+          สะอาดเหมือนใหม่ โดยไม่ต้องออกจากบ้าน
         </p>
 
-        <div className="flex flex-wrap gap-2 mt-5">
-          <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white">
-            ✓ รับ-ส่งฟรี
-          </span>
-
-          <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white">
-            ✓ รีวิว 4.9/5
-          </span>
-
-          <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white">
-            ✓ ซักแล้ว 10,000+ คู่
-          </span>
-        </div>
-
-      </div>
-    </section>
-
-    {/* Steps */}
-    <section className="max-w-lg mx-auto px-4 -mt-5 relative z-10">
-
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5">
-
-        <div className="text-sm font-semibold text-slate-800 mb-4">
-          ขั้นตอนการใช้บริการ
-        </div>
-
-        <div className="grid grid-cols-4 gap-3 text-center">
-
-          <div>
-            <div className="w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 font-bold flex items-center justify-center mx-auto">
-              1
-            </div>
-            <div className="text-xs mt-2 text-slate-600">
-              จองคิว
-            </div>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mt-5">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xl">⭐</span>
+            <div className="font-extrabold text-gray-900 text-sm">4.9/5</div>
+            <div className="text-xs text-gray-400 leading-tight text-center">จาก 1,200+ รีวิว</div>
           </div>
-
-          <div>
-            <div className="w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 font-bold flex items-center justify-center mx-auto">
-              2
-            </div>
-            <div className="text-xs mt-2 text-slate-600">
-              เข้ารับรองเท้า
-            </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xl">👟</span>
+            <div className="font-extrabold text-gray-900 text-sm">10,000+ คู่</div>
+            <div className="text-xs text-gray-400 leading-tight text-center">ซักแล้วมากกว่า</div>
           </div>
-
-          <div>
-            <div className="w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 font-bold flex items-center justify-center mx-auto">
-              3
-            </div>
-            <div className="text-xs mt-2 text-slate-600">
-              ทำความสะอาด
-            </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xl">🚚</span>
+            <div className="font-extrabold text-gray-900 text-sm">รับ-ส่งฟรี</div>
+            <div className="text-xs text-gray-400 leading-tight text-center">ทั่วเชียงใหม่</div>
           </div>
-
-          <div>
-            <div className="w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 font-bold flex items-center justify-center mx-auto">
-              4
-            </div>
-            <div className="text-xs mt-2 text-slate-600">
-              จัดส่งคืน
-            </div>
-          </div>
-
         </div>
+      </section>
 
-      </div>
-    </section>
-
-    {/* Services */}
-    <section className="max-w-lg mx-auto px-4 py-5">
-
-      <SelectableLink
-        href="/service/pickup"
-        className="group block bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-lg transition-all duration-300"
-      >
-
-        <div className="flex items-center justify-between">
-
-          <div className="flex gap-4 flex-1 min-w-0">
-
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center text-2xl flex-shrink-0">
-              
-            </div>
-
-            <div className="min-w-0">
-
-              <h2 className="font-bold text-slate-900 text-lg">
-                นัดหมายรับรองเท้า
-              </h2>
-
-              <p className="text-sm text-slate-500 mt-1 leading-relaxed">
-                เลือกวันและเวลาที่สะดวกให้พนักงานเข้ารับถึงบ้าน
-              </p>
-
-              <div className="mt-3 inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold">
-                ✓ บริการรับ-ส่งฟรี
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="w-11 h-11 rounded-full bg-[#2ABFAB] flex items-center justify-center text-white flex-shrink-0 ml-3">
-            →
-          </div>
-
-        </div>
-
-      </SelectableLink>
-
-    </section>
-
-    {/* Trust Section */}
-    <section className="max-w-lg mx-auto px-4 pb-24">
-
-      <div className="bg-slate-50 rounded-3xl p-5">
-
-        <div className="font-semibold text-slate-900 mb-3">
-          ทำไมลูกค้าถึงเลือกเรา
-        </div>
-
-        <div className="space-y-3 text-sm text-slate-600">
-
-          <div>✓ รับ-ส่งฟรีทั่วเชียงใหม่</div>
-
-          <div>✓ ดูแลรองเท้าทุกประเภท</div>
-
-          <div>✓ ทีมงานมีประสบการณ์</div>
-
-          <div>✓ สะดวก ไม่ต้องออกจากบ้าน</div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    {/* Sticky CTA */}
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-slate-200 p-4">
-
-      <div className="max-w-lg mx-auto">
-
+      {/* CTA */}
+      <section className="px-4 mt-6">
         <SelectableLink
           href="/service/pickup"
-          className="block w-full text-center bg-[#2ABFAB] text-white py-4 rounded-2xl font-semibold shadow-lg"
+          className="block w-full bg-[#2ABFAB] text-white rounded-2xl px-5 py-4 shadow-lg active:scale-[0.98] transition-transform"
         >
-          จองคิวรับรองเท้า
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 font-bold text-lg">
+                <span>📅</span> จองคิวรับรองเท้า
+              </div>
+              <div className="text-sm text-white/80 mt-0.5">เลือกวันและเวลา</div>
+            </div>
+            <span className="text-2xl">→</span>
+          </div>
         </SelectableLink>
+        <p className="text-center text-xs text-gray-400 mt-2">
+          🛡 เร็วมาก ใช้เวลาไม่เกิน 1 นาที
+        </p>
+      </section>
 
+      {/* ผลงานล่าสุด */}
+      <section className="px-4 mt-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold text-gray-900">ผลงานล่าสุด</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: 'Nike Air Force 1', desc: 'ขอบเหลืองกลับมาขาว' },
+            { label: 'New Balance 530', desc: 'คราบฝังลึกหายเกลี้ยง' },
+            { label: 'Adidas Stan Smith', desc: 'สีขาวสะอาดเหมือนใหม่' },
+            { label: 'Vans Old Skool', desc: 'ผ้าใบดำขาวคืนความสดใหม่' },
+          ].map((item, i) => (
+            <div key={i} className="rounded-2xl overflow-hidden border border-gray-100">
+              {/* Placeholder รูป — เปลี่ยนเป็น <img> จริงได้เลย */}
+              <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative">
+                <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">ก่อนซัก</div>
+                <div className="absolute top-2 right-2 bg-[#2ABFAB]/80 text-white text-[10px] px-2 py-0.5 rounded-full">หลังซัก</div>
+                <div className="absolute inset-0 flex items-center justify-center text-4xl">👟</div>
+              </div>
+              <div className="px-3 py-2">
+                <div className="font-semibold text-xs text-gray-900">{item.label}</div>
+                <div className="text-xs text-gray-400 mt-0.5">{item.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ขั้นตอน */}
+      <section className="px-4 mt-8">
+        <h2 className="font-bold text-gray-900 text-center mb-5">ขั้นตอนการใช้บริการ</h2>
+        <div className="grid grid-cols-4 gap-2 text-center">
+          {[
+            { step: 1, icon: '📅', label: 'จองคิว' },
+            { step: 2, icon: '🚚', label: 'รับรองเท้า' },
+            { step: 3, icon: '✨', label: 'ทำความสะอาด' },
+            { step: 4, icon: '📦', label: 'ส่งคืน' },
+          ].map(({ step, icon, label }, i) => (
+            <div key={step} className="flex flex-col items-center gap-1.5 relative">
+              {i < 3 && (
+                <div className="absolute top-5 left-[60%] right-[-40%] h-0.5 bg-gray-200" />
+              )}
+              <div className="w-10 h-10 rounded-full bg-[#2ABFAB] text-white font-bold flex items-center justify-center text-lg z-10 relative">
+                {icon}
+              </div>
+              <div className="text-xs text-gray-500 leading-tight">{label}</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-gray-400 mt-5">
+          🛡 ข้อมูลของคุณปลอดภัย 100%
+        </p>
+      </section>
+
+      {/* Sticky CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-100 p-4">
+        <div className="max-w-lg mx-auto">
+          <SelectableLink
+            href="/service/pickup"
+            className="block w-full text-center bg-[#2ABFAB] text-white py-4 rounded-2xl font-bold text-base shadow-lg active:scale-[0.98] transition-transform"
+          >
+            📅 จองคิวรับรองเท้า
+          </SelectableLink>
+        </div>
       </div>
 
-    </div>
-
-  </main>
-)
+    </main>
+  )
 }

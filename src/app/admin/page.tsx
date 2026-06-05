@@ -16,7 +16,7 @@ export default async function AdminPage() {
   const supabase = await createClient()
   const today = todayInBangkok()
 
-  // ดึงนัดหมายทั้งหมดที่ไม่ใช่ เสร็จสิ้น / ยกเลิก
+  // ดึงนัดหมายทั้งหมดที่ไม่ใช่ เสร็จสิ้น / ยกเลิก / สำเร็จ
   const { data: allAppointments } = await supabase
     .from('appointments')
     .select(`
@@ -30,7 +30,24 @@ export default async function AdminPage() {
     .order('appointment_date')
     .order('appointment_time')
 
+  // ดึงนัดหมายที่สำเร็จวันนี้ (updated_at = วันนี้)
+  const todayStart = `${today}T00:00:00+07:00`
+  const todayEnd   = `${today}T23:59:59+07:00`
+  const { data: completedToday } = await supabase
+    .from('appointments')
+    .select(`
+      id, appointment_date, appointment_time, location, shoe_count,
+      customer_name, phone, updated_at,
+      services ( service_name )
+    `)
+    .eq('branch_id', admin.branchId)
+    .eq('status', 'สำเร็จ')
+    .gte('updated_at', todayStart)
+    .lte('updated_at', todayEnd)
+    .order('updated_at', { ascending: false })
+
   const appointments = (allAppointments ?? []) as any[]
+  const completed    = (completedToday  ?? []) as any[]
 
   // จำนวนรอยืนยัน
   const pendingCount = appointments.filter(a => a.status === 'รอดำเนินการ').length
@@ -59,7 +76,7 @@ export default async function AdminPage() {
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-8">
 
         {/* Summary */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className={`rounded-xl p-4 border ${pendingCount > 0 ? 'border-amber-700 bg-amber-950/30' : 'border-gray-800 bg-gray-900'}`}>
             <div className={`text-3xl font-bold tabular-nums ${pendingCount > 0 ? 'text-amber-300' : 'text-white'}`}>
               {pendingCount}
@@ -68,7 +85,11 @@ export default async function AdminPage() {
           </div>
           <div className="border border-gray-800 bg-gray-900 rounded-xl p-4">
             <div className="text-3xl font-bold tabular-nums text-white">{appointments.length}</div>
-            <div className="text-xs text-gray-500 mt-1.5 uppercase tracking-wider">นัดหมายทั้งหมด</div>
+            <div className="text-xs text-gray-500 mt-1.5 uppercase tracking-wider">นัดหมาย</div>
+          </div>
+          <div className="border border-blue-900 bg-blue-950/30 rounded-xl p-4">
+            <div className="text-3xl font-bold tabular-nums text-blue-300">{completed.length}</div>
+            <div className="text-xs text-gray-500 mt-1.5 uppercase tracking-wider">รับแล้ววันนี้</div>
           </div>
         </div>
 
@@ -119,6 +140,39 @@ export default async function AdminPage() {
               </div>
             </section>
           ))
+        )}
+
+        {/* รับรองเท้าแล้ววันนี้ */}
+        {completed.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="text-base font-bold">👟 รับรองเท้าแล้ววันนี้</h2>
+              <span className="text-xs text-blue-400 bg-blue-950/50 px-2 py-0.5 rounded-full">{completed.length} รายการ</span>
+            </div>
+            <div className="border border-gray-800 bg-gray-900 rounded-xl overflow-hidden divide-y divide-gray-800">
+              {completed.map((b) => (
+                <Link key={b.id}
+                  href={`/admin/appointments/${b.id}`}
+                  className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-800 transition">
+                  <div className="flex-shrink-0 text-center w-14">
+                    <div className="text-base font-bold tabular-nums">
+                      {String(b.appointment_time).slice(0, 5)}
+                    </div>
+                    <div className="text-xs text-blue-400 mt-0.5">สำเร็จ</div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{b.customer_name}</div>
+                    <div className="text-xs text-gray-500 truncate">
+                      {b.services?.service_name} · {b.shoe_count} คู่
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {new Date(b.updated_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
       </div>
