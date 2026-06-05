@@ -46,7 +46,7 @@ export function BeforeAfterSlider({
       {/* หลังซัก — เต็ม container */}
       <img
         src={afterSrc} alt="หลังซัก"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover object-top"
         draggable={false}
       />
 
@@ -57,7 +57,7 @@ export function BeforeAfterSlider({
       >
         <img
           src={beforeSrc} alt="ก่อนซัก"
-          className="absolute top-0 left-0 h-full object-cover"
+          className="absolute top-0 left-0 h-full object-cover object-top"
           style={{ width: width || '100%' }}
           draggable={false}
         />
