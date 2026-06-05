@@ -91,7 +91,7 @@ export default async function ServicePage() {
                 <CalendarDays className="w-5 h-5" />
                 จองคิวรับรองเท้า
               </div>
-              <div className="text-sm text-white/80 mt-0.5">เลือกวันและเวลา</div>
+              <div className="text-sm text-white/70 mt-0.5 font-medium">Book a Pickup</div>
             </div>
             <ArrowRight className="w-6 h-6" />
           </div>
