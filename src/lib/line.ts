@@ -152,7 +152,7 @@ export function buildAdminNotifyFlex(data: {
       style: 'primary',
       color: '#18181B',
       height: 'sm',
-      action: { type: 'uri', label: 'Dashboard', uri: adminUrl(data.adminGroupId, data.appointmentId) },
+      action: { type: 'uri', label: 'Dashboard', uri: adminUrl(data.appointmentId) },
     },
   ]
 
