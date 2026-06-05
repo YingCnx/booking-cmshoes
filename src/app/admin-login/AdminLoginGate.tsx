@@ -82,7 +82,6 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
           body: JSON.stringify({
             lineUserId: profile.userId,
             displayName: profile.displayName,
-            groupId: resolvedGroupId,
           }),
         })
 
