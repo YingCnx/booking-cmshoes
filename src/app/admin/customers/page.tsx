@@ -9,13 +9,30 @@ export default async function CustomersPage() {
   const admin = await requireAdminSession()
   const supabase = await createClient()
 
+  // ดึง customers + location ล่าสุดจาก appointments
   const { data } = await supabase
     .from('customers')
-    .select('id, name, phone, location, line_user_id, created_at')
+    .select(`
+      id, name, phone, location, line_user_id, created_at,
+      appointments ( location, appointment_date )
+    `)
     .eq('branch_id', admin.branchId)
     .order('name')
 
-  const customers = (data ?? []) as any[]
+  // เอา location ล่าสุดจาก appointments มาใช้ถ้า customers.location ว่าง
+  const customers = (data ?? []).map((c: any) => {
+    const sorted = (c.appointments ?? [])
+      .sort((a: any, b: any) => b.appointment_date.localeCompare(a.appointment_date))
+    const lastLocation = sorted[0]?.location ?? null
+    return {
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      location: c.location || lastLocation,
+      line_user_id: c.line_user_id,
+      created_at: c.created_at,
+    }
+  })
 
   return (
     <div className="min-h-screen bg-black text-white">
