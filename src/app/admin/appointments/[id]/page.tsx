@@ -16,7 +16,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
     .from('appointments')
     .select(`
       id, appointment_date, appointment_time, end_time,
-      customer_name, phone, location, shoe_count, status,
+      customer_name, phone, location, shoe_count, status, notes,
       created_at, appointment_type, branch_id, customer_id,
       services ( service_name, base_price ),
       customers ( line_user_id )
@@ -24,7 +24,6 @@ export default async function AppointmentDetailPage({ params }: Props) {
     .eq('id', parseInt(id))
     .maybeSingle()
 
-  console.log('[apt-detail] id:', id, 'apt:', apt?.id, 'branch:', apt?.branch_id, 'adminBranch:', admin.branchId, 'error:', aptError?.message)
 
   if (!apt || apt.branch_id !== admin.branchId) {
     return (
@@ -77,7 +76,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
             <DetailRow label="สถานที่รับ" value={apt.location} />
             <DetailRow label="จำนวน" value={`${apt.shoe_count} คู่`} />
             <DetailRow label="ที่มา" value={apt.appointment_type ?? 'walk-in'} />
-            {(apt as any).notes && <DetailRow label="หมายเหตุ" value={(apt as any).notes} />}
+            {apt.notes && <DetailRow label="หมายเหตุ" value={apt.notes} />}
           </div>
         </div>
 
