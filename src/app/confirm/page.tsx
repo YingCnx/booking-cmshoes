@@ -42,6 +42,10 @@ export default async function ConfirmPage({ searchParams }: Props) {
   const defaultPhone    = existing?.phone    ?? ''
   const defaultLocation = existing?.location ?? ''
 
+  console.log('[confirm] lineUserId:', session.lineUserId)
+  console.log('[confirm] existing:', existing)
+  console.log('[confirm] defaultPhone:', defaultPhone)
+
   return (
     <main className="min-h-screen bg-gray-50">
 
