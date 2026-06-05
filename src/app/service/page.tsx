@@ -109,8 +109,8 @@ export default async function ServicePage() {
         <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Adidas Adizero', desc: 'คราบฝังลึกหายเกลี้ยง', before: '/adizero-before.jpg', after: '/adizero-after.jpg' },
-            { label: 'Birkenstock',     desc: 'หนังกลับสะอาดเหมือนใหม่', before: '/birken-before.jpg', after: '/birken-after.jpg' },
-            { label: 'On Cloud',        desc: 'พื้นขาวสะอาด ไม่เหลืองซ้ำ', before: '/oncloud-before.jpg', after: '/oncloud-after.jpg' },
+            { label: 'Birkenstock',     desc: 'สะอาด วัสดุไม่เสียหาย', before: '/birken-before.jpg', after: '/birken-after.jpg' },
+            { label: 'On Cloud',        desc: 'คราบดินโคลนไม่เหลือ', before: '/oncloud-before.jpg', after: '/oncloud-after.jpg' },
             { label: 'Puma Speedcat',   desc: 'หนังแท้กลับมาเงางาม', before: '/speedcat-before.jpg', after: '/speedcat-after.jpg' },
           ].map((item, i) => (
             <div key={i} className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
