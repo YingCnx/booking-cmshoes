@@ -33,24 +33,15 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
           })
         }
 
-        await window.liff.init({ liffId, withLoginOnExternalBrowser: true })
+        // ✅ ถ้าอยู่ใน LINE app ใช้ auto-login, ถ้าอยู่นอก LINE ให้ login ผ่าน web
+        const isInClient = window.liff.isInClient?.() ?? false
+        await window.liff.init({ liffId, withLoginOnExternalBrowser: !isInClient })
 
         if (!window.liff.isLoggedIn()) {
-          // ✅ ป้องกันวนลูป — ถ้าเคย redirect ไปแล้วแต่ยังไม่ได้ login ให้หยุด
-          if (sessionStorage.getItem('liff_login_redirect')) {
-            sessionStorage.removeItem('liff_login_redirect')
-            setStatus('error')
-            setError('ไม่สามารถ login LINE ได้ กรุณาลองใหม่')
-            return
-          }
-          sessionStorage.setItem('liff_login_redirect', '1')
           setMessage('กรุณา login LINE...')
           window.liff.login({ redirectUri: window.location.href })
           return
         }
-
-        // ✅ login สำเร็จ ล้าง flag
-        sessionStorage.removeItem('liff_login_redirect')
 
         setMessage('กำลังตรวจสอบสิทธิ์...')
         setStatus('verifying')
