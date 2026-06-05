@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 
 export function BeforeAfterSlider({
   beforeSrc = '/before.jpg',
@@ -10,8 +10,19 @@ export function BeforeAfterSlider({
   afterSrc?: string
 }) {
   const [position, setPosition] = useState(50)
+  const [width, setWidth] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const ro = new ResizeObserver(entries => {
+      setWidth(entries[0].contentRect.width)
+    })
+    ro.observe(containerRef.current)
+    setWidth(containerRef.current.offsetWidth)
+    return () => ro.disconnect()
+  }, [])
 
   const updatePosition = useCallback((clientX: number) => {
     if (!containerRef.current) return
@@ -20,52 +31,57 @@ export function BeforeAfterSlider({
     setPosition((x / rect.width) * 100)
   }, [])
 
-  const onMouseDown = () => { isDragging.current = true }
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current) return
-    updatePosition(e.clientX)
-  }
-  const onMouseUp = () => { isDragging.current = false }
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    updatePosition(e.touches[0].clientX)
-  }
-
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-[3/2] rounded-2xl overflow-hidden select-none cursor-col-resize"
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-      onTouchMove={onTouchMove}
+      className="relative w-full aspect-[3/2] rounded-2xl overflow-hidden select-none cursor-col-resize bg-gray-100"
+      onMouseDown={() => { isDragging.current = true }}
+      onMouseMove={e => { if (isDragging.current) updatePosition(e.clientX) }}
+      onMouseUp={() => { isDragging.current = false }}
+      onMouseLeave={() => { isDragging.current = false }}
+      onTouchStart={() => { isDragging.current = true }}
+      onTouchMove={e => updatePosition(e.touches[0].clientX)}
+      onTouchEnd={() => { isDragging.current = false }}
     >
-      {/* หลังซัก (ด้านหลัง) */}
-      <img src={afterSrc} alt="หลังซัก"
-        className="absolute inset-0 w-full h-full object-cover" />
+      {/* หลังซัก — เต็ม container */}
+      <img
+        src={afterSrc} alt="หลังซัก"
+        className="absolute inset-0 w-full h-full object-cover"
+        draggable={false}
+      />
 
-      {/* ก่อนซัก (clip ตามตำแหน่ง) */}
-      <div className="absolute inset-0 overflow-hidden"
-        style={{ width: `${position}%` }}>
-        <img src={beforeSrc} alt="ก่อนซัก"
-          className="absolute top-0 left-0 h-full object-cover object-left"
-          style={{ width: containerRef.current?.getBoundingClientRect().width ?? '100%' }} />
+      {/* ก่อนซัก — clip ทางซ้ายตาม position */}
+      <div
+        className="absolute inset-0 overflow-hidden"
+        style={{ width: `${position}%` }}
+      >
+        <img
+          src={beforeSrc} alt="ก่อนซัก"
+          className="absolute top-0 left-0 h-full object-cover"
+          style={{ width: width || '100%' }}
+          draggable={false}
+        />
       </div>
 
-      {/* Divider */}
-      <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg"
-        style={{ left: `${position}%` }}>
-        <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white shadow-xl flex items-center justify-center">
-          <span className="text-gray-600 text-sm font-bold">⇔</span>
+      {/* Divider line */}
+      <div
+        className="absolute top-0 bottom-0 w-[2px] bg-white shadow-[0_0_8px_rgba(0,0,0,0.4)]"
+        style={{ left: `calc(${position}% - 1px)` }}
+      >
+        {/* Handle */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 3L3 8l5 5"/><path d="M16 3l5 5-5 5"/>
+            <line x1="3" y1="8" x2="21" y2="8"/>
+          </svg>
         </div>
       </div>
 
       {/* Labels */}
-      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
+      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
         ก่อนซัก
       </div>
-      <div className="absolute top-3 right-3 bg-[#2ABFAB]/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
+      <div className="absolute top-3 right-3 bg-[#2ABFAB]/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
         หลังซัก
       </div>
     </div>
