@@ -43,11 +43,14 @@ export default async function ServicePage() {
 
       {/* Title + Stats */}
       <section className="px-5 pt-6 text-center">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+          CМ Shoe Clean · Chiang Mai
+        </p>
         <h1 className="text-3xl font-extrabold text-gray-900 leading-tight tracking-tight">
           จองคิวซักรองเท้า
         </h1>
         <p className="mt-2 text-[#2ABFAB] font-semibold text-base">
-          สะอาดเหมือนใหม่ โดยไม่ต้องออกจากบ้าน
+          รับ-ส่งถึงบ้าน สะอาดทุกคู่
         </p>
 
         {/* Stats */}
