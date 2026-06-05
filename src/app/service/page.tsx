@@ -50,7 +50,7 @@ export default async function ServicePage() {
           จองคิวซักรองเท้า
         </h1>
         <p className="mt-2 text-[#2ABFAB] font-semibold text-base">
-          รองเท้าสะอาด วัสดุไม่เสียหาย
+          ดูแลโดยช่างมืออาชีพ
 
         </p>
 
