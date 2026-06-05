@@ -114,21 +114,10 @@ export default async function ServicePage() {
             { label: 'Puma Speedcat',   desc: 'หนังแท้กลับมาเงางาม', before: '/speedcat-before.jpg', after: '/speedcat-after.jpg' },
           ].map((item, i) => (
             <div key={i} className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="aspect-square relative overflow-hidden">
-                {/* หลังซัก */}
-                <img src={item.after} alt={`${item.label} หลังซัก`}
-                  className="absolute inset-0 w-full h-full object-contain bg-gray-50" />
-                {/* ก่อนซัก — ครึ่งซ้าย */}
-                <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
-                  <img src={item.before} alt={`${item.label} ก่อนซัก`}
-                    className="absolute top-0 left-0 h-full object-contain bg-gray-100"
-                    style={{ width: '200%' }} />
-                </div>
-                {/* เส้นแบ่ง */}
-                <div className="absolute top-0 bottom-0 w-px bg-white/80 left-1/2" />
-                <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">ก่อนซัก</div>
-                <div className="absolute top-2 right-2 bg-[#2ABFAB]/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">หลังซัก</div>
-              </div>
+              <BeforeAfterSlider
+                beforeSrc={item.before}
+                afterSrc={item.after}
+              />
               <div className="px-3 py-2.5">
                 <div className="font-semibold text-xs text-gray-900">{item.label}</div>
                 <div className="text-xs text-gray-400 mt-0.5">{item.desc}</div>
