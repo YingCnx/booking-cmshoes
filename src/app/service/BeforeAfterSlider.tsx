@@ -34,7 +34,7 @@ export function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden select-none cursor-col-resize"
+      className="relative w-full aspect-[3/2] rounded-2xl overflow-hidden select-none cursor-col-resize"
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -49,8 +49,8 @@ export function BeforeAfterSlider({
       <div className="absolute inset-0 overflow-hidden"
         style={{ width: `${position}%` }}>
         <img src={beforeSrc} alt="ก่อนซัก"
-          className="absolute inset-0 h-full object-cover"
-          style={{ width: containerRef.current?.offsetWidth ?? 400 }} />
+          className="absolute top-0 left-0 h-full object-cover object-left"
+          style={{ width: containerRef.current?.getBoundingClientRect().width ?? '100%' }} />
       </div>
 
       {/* Divider */}
