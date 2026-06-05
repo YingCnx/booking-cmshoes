@@ -50,7 +50,8 @@ export default async function ServicePage() {
           จองคิวซักรองเท้า
         </h1>
         <p className="mt-2 text-[#2ABFAB] font-semibold text-base">
-          บริการรับ-ส่งฟรี สะอาดทุกคู่
+          รองเท้าสะอาด วัสดุไม่เสียหาย
+
         </p>
 
         {/* Stats */}
@@ -60,7 +61,7 @@ export default async function ServicePage() {
               <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
             </div>
             <div className="font-bold text-gray-900 text-sm">4.9/5</div>
-            <div className="text-xs text-gray-400 leading-tight text-center">จาก 1,200+ รีวิว</div>
+            <div className="text-xs text-gray-400 leading-tight text-center">จาก google review</div>
           </div>
           <div className="flex flex-col items-center gap-1.5">
             <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center">
@@ -74,7 +75,7 @@ export default async function ServicePage() {
               <Truck className="w-5 h-5 text-blue-500" />
             </div>
             <div className="font-bold text-gray-900 text-sm">รับ-ส่งฟรี</div>
-            <div className="text-xs text-gray-400 leading-tight text-center">ทั่วเชียงใหม่</div>
+            <div className="text-xs text-gray-400 leading-tight text-center">ในเมืองเชียงใหม่</div>
           </div>
         </div>
       </section>
@@ -113,7 +114,7 @@ export default async function ServicePage() {
           {[
             { label: 'Adidas Adizero', desc: 'คราบฝังลึกหายเกลี้ยง', before: '/adizero-before.jpg', after: '/adizero-after.jpg' },
             { label: 'Birkenstock',     desc: 'สะอาด วัสดุไม่เสียหาย', before: '/birken-before.jpg', after: '/birken-after.jpg' },
-            { label: 'On Cloud',        desc: 'คราบดินโคลนไม่เหลือ', before: '/oncloud-before.jpg', after: '/oncloud-after.jpg' },
+            { label: 'On Cloud',        desc: 'คราบดินโคลนไม่เหลือ', before: '/oncloud-before1.jpg', after: '/oncloud-after1.jpg' },
             { label: 'Puma Speedcat',   desc: 'หนังแท้กลับมาเงางาม', before: '/speedcat-before.jpg', after: '/speedcat-after.jpg' },
           ].map((item, i) => (
             <div key={i} className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
