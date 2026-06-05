@@ -15,10 +15,6 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
   const [error, setError]     = useState('')
 
   useEffect(() => {
-    if (!groupId) {
-      setStatus('no_group')
-      return
-    }
     if (!liffId) {
       setStatus('error')
       setError('ระบบยังไม่ได้ตั้งค่า LIFF')
@@ -39,7 +35,7 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
 
         await window.liff.init({ liffId, withLoginOnExternalBrowser: true })
 
-        // อ่าน groupId จาก URL หลัง liff.init() เสร็จ (เผื่อ LIFF restore liff.state แล้ว)
+        // ✅ อ่าน groupId หลัง liff.init() เสร็จ เพราะ LIFF จะ restore liff.state ก่อน
         const urlParams = new URLSearchParams(window.location.search)
         const resolvedGroupId = urlParams.get('groupId') || groupId
 
