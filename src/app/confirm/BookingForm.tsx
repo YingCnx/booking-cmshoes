@@ -156,8 +156,7 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-[#2ABFAB] flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-gray-900">บ้าน</div>
-                    <div className="text-sm text-gray-600 mt-0.5">{defaults.location}</div>
+                    <div className="text-sm text-gray-600">{defaults.location}</div>
                   </div>
                   <button type="button" onClick={() => setUseOther(true)}
                     className="text-gray-300 flex-shrink-0">›</button>
