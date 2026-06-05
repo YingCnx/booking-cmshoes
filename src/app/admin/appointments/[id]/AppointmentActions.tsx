@@ -5,6 +5,7 @@ import { useState } from 'react'
 type Props = {
   appointmentId: number
   currentStatus: string
+  appointmentType: string
   lineUserId: string | null
   branchId: number
   notifyData: {
@@ -16,7 +17,7 @@ type Props = {
   }
 }
 
-type ActionType = 'confirm' | 'cancel' | null
+type ActionType = 'confirm' | 'receive' | 'cancel' | null
 
 const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
   newStatus: string
@@ -34,6 +35,14 @@ const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
     btnClass: 'bg-emerald-600 hover:bg-emerald-500',
     loadingText: 'กำลังยืนยัน...',
   },
+  receive: {
+    newStatus: 'สำเร็จ',
+    title: 'รับรองเท้าเข้าร้านแล้ว?',
+    desc: 'ยืนยันว่ารับรองเท้าจากลูกค้าเรียบร้อยแล้ว',
+    btnText: 'รับรองเท้าแล้ว',
+    btnClass: 'bg-blue-600 hover:bg-blue-500',
+    loadingText: 'กำลังบันทึก...',
+  },
   cancel: {
     newStatus: 'ยกเลิก',
     title: 'ยกเลิกการจอง?',
@@ -44,7 +53,7 @@ const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
   },
 }
 
-export function AppointmentActions({ appointmentId, currentStatus, lineUserId, branchId, notifyData }: Props) {
+export function AppointmentActions({ appointmentId, currentStatus, appointmentType, lineUserId, branchId, notifyData }: Props) {
   const [pendingAction, setPendingAction] = useState<ActionType>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -79,22 +88,52 @@ export function AppointmentActions({ appointmentId, currentStatus, lineUserId, b
     }
   }
 
-  // ✅ ไม่แสดงปุ่มถ้า status เป็น ยืนยันแล้ว / เสร็จสิ้น / ยกเลิก
-  if (currentStatus !== 'รอดำเนินการ') {
+  // ไม่แสดงปุ่มถ้าสำเร็จ / เสร็จสิ้น / ยกเลิก แล้ว
+  if (['สำเร็จ', 'เสร็จสิ้น', 'ยกเลิก'].includes(currentStatus)) {
     return null
   }
+
+  const isPickup = appointmentType === 'pickup'
 
   return (
     <>
       <div className="space-y-2">
-        <button onClick={() => setPendingAction('confirm')}
-          className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
-          ✓ ยืนยันการจอง
-        </button>
-        <button onClick={() => setPendingAction('cancel')}
-          className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
-          ✕ ยกเลิกการจอง
-        </button>
+
+        {/* รอดำเนินการ → ยืนยัน */}
+        {currentStatus === 'รอดำเนินการ' && (
+          <button onClick={() => setPendingAction('confirm')}
+            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
+            ✓ ยืนยันการจอง
+          </button>
+        )}
+
+        {/* ยืนยันแล้ว + นัดรับ → รับรองเท้าแล้ว */}
+        {currentStatus === 'ยืนยันแล้ว' && isPickup && (
+          <button onClick={() => setPendingAction('receive')}
+            className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition">
+            👟 รับรองเท้าแล้ว
+          </button>
+        )}
+
+        {/* ยืนยันแล้ว + นัดส่ง → แจ้งให้ทำที่ Desktop */}
+        {currentStatus === 'ยืนยันแล้ว' && !isPickup && (
+          <div className="w-full py-4 border border-blue-800 text-blue-400 text-sm text-center rounded-2xl">
+            นัดส่ง — กรุณาอัพเดทสถานะที่ระบบหลัก
+          </div>
+        )}
+
+        {/* ยกเลิก (ทุก status) */}
+        {currentStatus !== 'ยืนยันแล้ว' || isPickup ? (
+          <button onClick={() => setPendingAction('cancel')}
+            className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
+            ✕ ยกเลิกการจอง
+          </button>
+        ) : (
+          <button onClick={() => setPendingAction('cancel')}
+            className="w-full py-3 border border-red-800 text-red-400 font-medium rounded-2xl hover:bg-red-950/30 transition">
+            ✕ ยกเลิกการจอง
+          </button>
+        )}
 
         {error && (
           <p className="text-sm text-red-400 bg-red-950/30 border border-red-800 rounded-xl px-4 py-3">

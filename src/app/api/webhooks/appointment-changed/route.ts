@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { getBranchLineCredentials, pushMessage, buildAdminStatusChangeFlex } from '@/lib/line'
 
 // ============================================
 // Supabase Database Webhook
@@ -46,13 +47,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, skipped: `status ${newStatus} not notify` })
   }
 
-  // ดึงข้อมูลเต็มของ appointment + customer
+  // ดึงข้อมูลเต็มของ appointment + customer + service
   const supabase = await createClient()
   const { data: apt } = await supabase
     .from('appointments')
     .select(`
       id, appointment_date, appointment_time, location, shoe_count, branch_id,
-      customers ( line_user_id )
+      customer_name,
+      customers ( line_user_id ),
+      services ( service_name )
     `)
     .eq('id', record.id)
     .single()
@@ -62,39 +65,58 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'appointment not found' }, { status: 404 })
   }
 
+  const creds = await getBranchLineCredentials(apt.branch_id)
   const lineUserId = (apt.customers as any)?.line_user_id
-  if (!lineUserId) {
-    console.log('[webhook] no lineUserId for appointment:', apt.id)
-    return NextResponse.json({ ok: true, skipped: 'no line_user_id' })
-  }
-
-  // เรียก notify endpoint
+  const serviceName = (apt.services as any)?.service_name ?? 'นัดหมายรับรองเท้า'
   const notifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/line/notify`
-  const notifyType = newStatus === 'ยืนยันแล้ว' ? 'booking_confirmed' : 'booking_cancelled'
 
-  console.log('[webhook] → notify:', { notifyType, lineUserId, appointmentId: apt.id })
-
-  try {
-    const res = await fetch(notifyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: notifyType,
-        branchId: apt.branch_id,
-        data: {
-          lineUserId,
-          serviceName: 'นัดหมายรับรองเท้า',
+  // ✅ แจ้ง admin group ทุกครั้งที่สถานะเปลี่ยน
+  if (creds.adminGroupId && creds.accessToken) {
+    try {
+      await pushMessage(
+        creds.adminGroupId,
+        [buildAdminStatusChangeFlex({
+          customerName: apt.customer_name,
+          serviceName,
           date: apt.appointment_date,
           time: String(apt.appointment_time).slice(0, 5),
-          location: apt.location,
-          shoeCount: apt.shoe_count,
-        },
-      }),
-    })
-    const respText = await res.text()
-    console.log('[webhook] notify response:', res.status, respText)
-  } catch (err) {
-    console.error('[webhook] notify failed:', err)
+          oldStatus,
+          newStatus,
+          appointmentId: apt.id,
+        })],
+        creds.accessToken
+      )
+      console.log('[webhook] → admin group notified')
+    } catch (err) {
+      console.error('[webhook] admin notify failed:', err)
+    }
+  }
+
+  // ✅ แจ้งลูกค้า เฉพาะ ยืนยันแล้ว / ยกเลิก
+  if (lineUserId && (newStatus === 'ยืนยันแล้ว' || newStatus === 'ยกเลิก')) {
+    const notifyType = newStatus === 'ยืนยันแล้ว' ? 'booking_confirmed' : 'booking_cancelled'
+    console.log('[webhook] → notify customer:', { notifyType, lineUserId })
+    try {
+      const res = await fetch(notifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: notifyType,
+          branchId: apt.branch_id,
+          data: {
+            lineUserId,
+            serviceName,
+            date: apt.appointment_date,
+            time: String(apt.appointment_time).slice(0, 5),
+            location: apt.location,
+            shoeCount: apt.shoe_count,
+          },
+        }),
+      })
+      console.log('[webhook] customer notify response:', res.status)
+    } catch (err) {
+      console.error('[webhook] customer notify failed:', err)
+    }
   }
 
   return NextResponse.json({ ok: true })

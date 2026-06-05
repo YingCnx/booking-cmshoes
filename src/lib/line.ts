@@ -39,13 +39,78 @@ export async function pushMessage(to: string, messages: object[], accessToken: s
 }
 
 // ==============================================
-// Admin link — group-based
+// Admin link
 // ==============================================
-function adminUrl(groupId: string, appointmentId?: number) {
+function adminUrl(appointmentId?: number) {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  const params = new URLSearchParams({ groupId })
-  if (appointmentId) params.set('appointmentId', String(appointmentId))
-  return `${base}/admin-login?${params.toString()}`
+  if (appointmentId) return `${base}/admin/appointments/${appointmentId}`
+  return `${base}/admin`
+}
+
+// ==============================================
+// แจ้ง admin group — สถานะเปลี่ยน
+// ==============================================
+export function buildAdminStatusChangeFlex(data: {
+  customerName: string
+  serviceName: string
+  date: string
+  time: string
+  oldStatus: string
+  newStatus: string
+  appointmentId: number
+}) {
+  const dateLabel = new Date(data.date).toLocaleDateString('th-TH', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  })
+
+  const statusColor: Record<string, string> = {
+    'ยืนยันแล้ว': '#4ADE80',
+    'ยกเลิก':     '#F87171',
+    'สำเร็จ':     '#60A5FA',
+    'รอดำเนินการ': '#FBBF24',
+  }
+  const color = statusColor[data.newStatus] ?? '#FFFFFF'
+
+  return {
+    type: 'flex',
+    altText: `[อัพเดท] ${data.customerName} → ${data.newStatus}`,
+    contents: {
+      type: 'bubble',
+      size: 'kilo',
+      header: {
+        type: 'box', layout: 'vertical',
+        backgroundColor: '#18181B',
+        paddingAll: '10px',
+        contents: [
+          { type: 'text', text: 'สถานะนัดหมายเปลี่ยนแปลง', color: '#8E8E93', size: 'xxs', weight: 'bold' },
+          { type: 'text', text: data.customerName, color: '#FFFFFF', size: 'md', weight: 'bold', margin: 'xs' },
+        ],
+      },
+      body: {
+        type: 'box', layout: 'vertical', paddingAll: '10px', spacing: 'xs',
+        contents: [
+          compactRow('บริการ', data.serviceName),
+          compactRow('วันที่', `${dateLabel} · ${data.time} น.`),
+          { type: 'separator', margin: 'sm' },
+          {
+            type: 'box', layout: 'horizontal', margin: 'sm',
+            contents: [
+              { type: 'text', text: data.oldStatus, color: '#8E8E93', size: 'xs', flex: 2 },
+              { type: 'text', text: '→', color: '#8E8E93', size: 'xs', flex: 1, align: 'center' },
+              { type: 'text', text: data.newStatus, color, size: 'xs', weight: 'bold', flex: 2, align: 'end' },
+            ],
+          },
+        ],
+      },
+      footer: {
+        type: 'box', layout: 'vertical', paddingAll: '8px',
+        contents: [{
+          type: 'button', style: 'primary', color: '#18181B', height: 'sm',
+          action: { type: 'uri', label: 'ดูรายละเอียด', uri: adminUrl(data.appointmentId) },
+        }],
+      },
+    },
+  }
 }
 
 // ==============================================

@@ -6,7 +6,7 @@ export async function PATCH(req: Request) {
 
   console.log('[booking-status] ▶ request:', { appointmentId, status })
 
-  const allowed = ['รอดำเนินการ', 'ยืนยันแล้ว', 'เสร็จสิ้น', 'ยกเลิก']
+  const allowed = ['รอดำเนินการ', 'ยืนยันแล้ว', 'เสร็จสิ้น', 'สำเร็จ', 'ยกเลิก']
   if (!appointmentId || !allowed.includes(status)) {
     return NextResponse.json({ error: 'invalid status' }, { status: 400 })
   }

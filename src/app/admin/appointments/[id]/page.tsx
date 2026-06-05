@@ -82,6 +82,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
         <AppointmentActions
           appointmentId={apt.id}
           currentStatus={apt.status}
+          appointmentType={apt.appointment_type ?? 'pickup'}
           lineUserId={(apt.customers as any)?.line_user_id ?? null}
           branchId={admin.branchId}
           notifyData={{
