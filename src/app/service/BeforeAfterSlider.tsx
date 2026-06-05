@@ -34,7 +34,7 @@ export function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-[3/2] rounded-2xl overflow-hidden select-none cursor-col-resize bg-gray-100"
+      className="relative w-full aspect-square rounded-2xl overflow-hidden select-none cursor-col-resize bg-gray-50"
       onMouseDown={() => { isDragging.current = true }}
       onMouseMove={e => { if (isDragging.current) updatePosition(e.clientX) }}
       onMouseUp={() => { isDragging.current = false }}
@@ -46,7 +46,7 @@ export function BeforeAfterSlider({
       {/* หลังซัก — เต็ม container */}
       <img
         src={afterSrc} alt="หลังซัก"
-        className="absolute inset-0 w-full h-full object-cover object-top"
+        className="absolute inset-0 w-full h-full object-contain"
         draggable={false}
       />
 
@@ -57,7 +57,7 @@ export function BeforeAfterSlider({
       >
         <img
           src={beforeSrc} alt="ก่อนซัก"
-          className="absolute top-0 left-0 h-full object-cover object-top"
+          className="absolute top-0 left-0 h-full object-contain"
           style={{ width: width || '100%' }}
           draggable={false}
         />
