@@ -12,7 +12,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
   const admin = await requireAdminSession()
   const supabase = await createClient()
 
-  const { data: apt } = await supabase
+  const { data: apt, error: aptError } = await supabase
     .from('appointments')
     .select(`
       id, appointment_date, appointment_time, end_time,
@@ -22,7 +22,9 @@ export default async function AppointmentDetailPage({ params }: Props) {
       customers ( line_user_id )
     `)
     .eq('id', parseInt(id))
-    .single()
+    .maybeSingle()
+
+  console.log('[apt-detail] id:', id, 'apt:', apt?.id, 'branch:', apt?.branch_id, 'adminBranch:', admin.branchId, 'error:', aptError?.message)
 
   if (!apt || apt.branch_id !== admin.branchId) {
     return (
