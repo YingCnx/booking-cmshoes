@@ -108,16 +108,26 @@ export default async function ServicePage() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Nike Air Force 1', desc: 'ขอบเหลืองกลับมาขาว' },
-            { label: 'New Balance 530', desc: 'คราบฝังลึกหายเกลี้ยง' },
-            { label: 'Adidas Stan Smith', desc: 'สีขาวสะอาดเหมือนใหม่' },
-            { label: 'Vans Old Skool', desc: 'ผ้าใบดำขาวคืนความสดใหม่' },
+            { label: 'New Balance 530', desc: 'คราบฝังลึกหายเกลี้ยง', before: '/nb530-before.jpg', after: '/nb530-after.jpg' },
+            { label: 'Birkenstock',     desc: 'หนังกลับสะอาดเหมือนใหม่', before: '/birken-before.jpg', after: '/birken-after.jpg' },
+            { label: 'On Cloud',        desc: 'พื้นขาวสะอาด ไม่เหลืองซ้ำ', before: '/oncloud-before.jpg', after: '/oncloud-after.jpg' },
+            { label: 'Puma Speedcat',   desc: 'หนังแท้กลับมาเงางาม', before: '/speedcat-before.jpg', after: '/speedcat-after.jpg' },
           ].map((item, i) => (
             <div key={i} className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative flex items-center justify-center">
+              <div className="aspect-square relative overflow-hidden">
+                {/* หลังซัก */}
+                <img src={item.after} alt={`${item.label} หลังซัก`}
+                  className="absolute inset-0 w-full h-full object-contain bg-gray-50" />
+                {/* ก่อนซัก — ครึ่งซ้าย */}
+                <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
+                  <img src={item.before} alt={`${item.label} ก่อนซัก`}
+                    className="absolute top-0 left-0 h-full object-contain bg-gray-100"
+                    style={{ width: '200%' }} />
+                </div>
+                {/* เส้นแบ่ง */}
+                <div className="absolute top-0 bottom-0 w-px bg-white/80 left-1/2" />
                 <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">ก่อนซัก</div>
                 <div className="absolute top-2 right-2 bg-[#2ABFAB]/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">หลังซัก</div>
-                <Footprints className="w-12 h-12 text-gray-300" />
               </div>
               <div className="px-3 py-2.5">
                 <div className="font-semibold text-xs text-gray-900">{item.label}</div>
