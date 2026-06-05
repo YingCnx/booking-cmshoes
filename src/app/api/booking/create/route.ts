@@ -13,7 +13,7 @@ function addMinutes(time: string, minutes: number) {
 }
 
 export async function POST(req: Request) {
-  const { time, date, name, phone, location, shoeCount } = await req.json()
+  const { time, date, name, phone, location, shoeCount, note } = await req.json()
 
   if (!time || !date || !name || !phone || !location || !shoeCount) {
     return NextResponse.json({ error: 'ข้อมูลไม่ครบถ้วน' }, { status: 400 })
@@ -78,16 +78,17 @@ export async function POST(req: Request) {
   if (session.lineUserId) {
     const { data } = await supabase
       .from('customers')
-      .select('id, branch_id')
+      .select('id, branch_id, phone')
       .eq('line_user_id', session.lineUserId)
       .maybeSingle()
     customer = data
   }
 
   if (customer) {
-    // มี line_user_id ในระบบแล้ว — update แค่ชื่อ
+    // มี line_user_id ในระบบแล้ว — update ชื่อ + phone (เผื่อเปลี่ยน)
     await supabase.from('customers').update({
       name,
+      phone,
       line_display_name: session.displayName,
       updated_at: new Date().toISOString(),
     }).eq('id', customer.id)
@@ -164,6 +165,7 @@ export async function POST(req: Request) {
       branch_id: session.branchId,
       customer_id: customer.id,
       appointment_type: 'pickup',
+      ...(note ? { notes: note } : {}),
     })
     .select('id').single()
 
