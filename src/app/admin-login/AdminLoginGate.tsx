@@ -39,6 +39,15 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
 
         await window.liff.init({ liffId, withLoginOnExternalBrowser: true })
 
+        // อ่าน groupId จาก URL หลัง liff.init() เสร็จ (เผื่อ LIFF restore liff.state แล้ว)
+        const urlParams = new URLSearchParams(window.location.search)
+        const resolvedGroupId = urlParams.get('groupId') || groupId
+
+        if (!resolvedGroupId) {
+          setStatus('no_group')
+          return
+        }
+
         if (!window.liff.isLoggedIn()) {
           setMessage('กรุณา login LINE...')
           window.liff.login({ redirectUri: window.location.href })
@@ -48,7 +57,20 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
         setMessage('กำลังตรวจสอบสิทธิ์...')
         setStatus('verifying')
 
-        const profile = await window.liff.getProfile()
+        // ✅ ตรวจสอบ token expired ก่อน getProfile
+        let profile
+        try {
+          profile = await window.liff.getProfile()
+        } catch (e: any) {
+          const msg = String(e?.message || e)
+          if (msg.toLowerCase().includes('expired') || msg.includes('access token')) {
+            setMessage('Token หมดอายุ กำลัง login ใหม่...')
+            try { window.liff.logout() } catch {}
+            window.liff.login({ redirectUri: window.location.href })
+            return
+          }
+          throw e
+        }
 
         const res = await fetch('/api/admin/auth/line', {
           method: 'POST',
@@ -56,7 +78,7 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
           body: JSON.stringify({
             lineUserId: profile.userId,
             displayName: profile.displayName,
-            groupId,
+            groupId: resolvedGroupId,
           }),
         })
 
@@ -71,8 +93,15 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
         setStatus('success')
         window.location.href = nextPath
       } catch (err: any) {
+        const msg = err?.message ?? 'เกิดข้อผิดพลาด'
+        // ✅ token expired ใน catch หลัก → relogin
+        if (msg.toLowerCase().includes('expired') || msg.includes('access token')) {
+          try { window.liff?.logout?.() } catch {}
+          try { window.liff?.login?.({ redirectUri: window.location.href }) } catch {}
+          return
+        }
         setStatus('error')
-        setError(err?.message ?? 'เกิดข้อผิดพลาด')
+        setError(msg)
       }
     }
     start()
