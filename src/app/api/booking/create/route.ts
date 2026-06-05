@@ -189,7 +189,7 @@ export async function POST(req: Request) {
             lineUserId: session.lineUserId,
             customerName: name,
             phone,
-            serviceName: 'นัดหมายรับรองเท้า',
+            serviceName: 'นัดรับรองเท้า',
             branchName: branch.name,
             date,
             time,

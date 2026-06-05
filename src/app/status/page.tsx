@@ -73,7 +73,7 @@ export default async function StatusPage() {
 
         <Link href="/service"
           className="block bg-gray-900 text-white rounded-2xl px-5 py-4 text-center text-sm font-bold active:scale-[0.99] transition">
-          + จองคิวใหม่
+          + นัดรับรองเท้า
         </Link>
 
       </div>

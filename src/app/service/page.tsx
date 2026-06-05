@@ -47,7 +47,7 @@ export default async function ServicePage() {
           ร้านซักเกิบแอนด์สปา
         </p>
         <h1 className="text-3xl font-extrabold text-gray-900 leading-tight tracking-tight">
-          จองคิวซักรองเท้า
+          นัดรับรองเท้า
         </h1>
         <p className="mt-2 text-[#2ABFAB] font-semibold text-base">
           ดูแลโดยช่างมืออาชีพ
@@ -90,7 +90,7 @@ export default async function ServicePage() {
             <div>
               <div className="flex items-center gap-2 font-bold text-lg">
                 <CalendarDays className="w-5 h-5" />
-                จองคิวรับรองเท้า
+                นัดรับรองเท้า
               </div>
               <div className="text-sm text-white/70 mt-0.5 font-medium">Book a Pickup</div>
             </div>
@@ -136,7 +136,7 @@ export default async function ServicePage() {
         <h2 className="font-bold text-gray-900 text-base text-center mb-5">ขั้นตอนการใช้บริการ</h2>
         <div className="grid grid-cols-4 gap-2 text-center">
           {[
-            { icon: CalendarDays, label: 'จองคิว', color: 'text-[#2ABFAB]', bg: 'bg-teal-50' },
+            { icon: CalendarDays, label: 'นัดหมาย', color: 'text-[#2ABFAB]', bg: 'bg-teal-50' },
             { icon: Truck,        label: 'รับรองเท้า', color: 'text-blue-500', bg: 'bg-blue-50' },
             { icon: Sparkles,     label: 'ทำความสะอาด', color: 'text-purple-500', bg: 'bg-purple-50' },
             { icon: Package,      label: 'ส่งคืน', color: 'text-orange-500', bg: 'bg-orange-50' },
@@ -166,7 +166,7 @@ export default async function ServicePage() {
             className="flex items-center justify-center gap-2 w-full bg-[#2ABFAB] text-white py-4 rounded-2xl font-bold text-base shadow-lg active:scale-[0.98] transition-transform"
           >
             <CalendarDays className="w-5 h-5" />
-            จองคิวรับรองเท้า
+            นัดรับรองเท้า
           </SelectableLink>
         </div>
       </div>

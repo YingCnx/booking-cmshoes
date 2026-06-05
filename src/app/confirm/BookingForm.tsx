@@ -87,14 +87,14 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
 
-        {/* นัดหมายรับรองเท้า card */}
+        {/* นัดรับรองเท้า card */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center gap-4 px-5 py-4">
             <div className="w-12 h-12 rounded-2xl bg-[#2ABFAB]/10 flex items-center justify-center flex-shrink-0">
               <CalendarDays className="w-6 h-6 text-[#2ABFAB]" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-gray-400 font-medium">นัดหมายรับรองเท้า</div>
+              <div className="text-xs text-gray-400 font-medium">นัดรับรองเท้า</div>
               <div className="text-lg font-extrabold text-gray-900 mt-0.5">{dateLabel}</div>
               <div className="text-xl font-extrabold text-[#2ABFAB]">{time} น.</div>
               <div className="text-xs text-gray-400 mt-0.5">{branchName}</div>

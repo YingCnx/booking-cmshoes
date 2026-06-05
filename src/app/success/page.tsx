@@ -43,7 +43,7 @@ export default async function SuccessPage({ searchParams }: Props) {
           <div className="absolute -bottom-2 right-2 w-3 h-3 rounded-full bg-purple-400 opacity-80" />
         </div>
 
-        <h1 className="text-2xl font-extrabold text-gray-900">จองคิวสำเร็จแล้ว!</h1>
+        <h1 className="text-2xl font-extrabold text-gray-900">นัดหมายสำเร็จแล้ว!</h1>
         <p className="text-sm text-gray-500 mt-2">ร้านได้รับข้อมูลของคุณเรียบร้อย</p>
       </div>
 
@@ -57,7 +57,7 @@ export default async function SuccessPage({ searchParams }: Props) {
                 <CalendarDays className="w-6 h-6 text-[#2ABFAB]" />
               </div>
               <div>
-                <div className="text-xs text-gray-400 font-medium">นัดหมายรับรองเท้า</div>
+                <div className="text-xs text-gray-400 font-medium">นัดรับรองเท้า</div>
                 <div className="text-base font-extrabold text-gray-900 mt-0.5">{dateLabel}</div>
                 <div className="text-lg font-extrabold text-[#2ABFAB]">{params.time} น.</div>
                 {params.branch && <div className="text-xs text-gray-400 mt-0.5">{params.branch}</div>}

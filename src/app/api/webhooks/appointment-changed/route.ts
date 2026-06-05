@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
   const creds = await getBranchLineCredentials(apt.branch_id)
   const lineUserId = (apt.customers as any)?.line_user_id
-  const serviceName = (apt.services as any)?.service_name ?? 'นัดหมายรับรองเท้า'
+  const serviceName = (apt.services as any)?.service_name ?? 'นัดรับรองเท้า'
   const notifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/line/notify`
 
   // ✅ แจ้ง admin group ทุกครั้งที่สถานะเปลี่ยน
