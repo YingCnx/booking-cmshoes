@@ -8,7 +8,9 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/admin')) {
     const hasSession = req.cookies.get('admin_session')?.value
     if (!hasSession) {
-      return NextResponse.redirect(new URL('/admin-login', req.url))
+      const loginUrl = new URL('/admin-login', req.url)
+      loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
     }
     return NextResponse.next()
   }

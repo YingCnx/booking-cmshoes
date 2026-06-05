@@ -27,7 +27,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
   ] = await Promise.all([
     supabase.from('branches').select('id, name').eq('id', session.branchId).single(),
     supabase.from('customers')
-      .select('name, phone, address')
+      .select('name, phone, location')
       .eq('line_user_id', session.lineUserId)
       .maybeSingle(),
   ])
@@ -40,7 +40,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
 
   const defaultName     = existing?.name     ?? session.displayName ?? ''
   const defaultPhone    = existing?.phone    ?? ''
-  const defaultLocation = existing?.address ?? ''
+  const defaultLocation = existing?.location ?? ''
 
   console.log('[confirm] lineUserId:', session.lineUserId)
   console.log('[confirm] existing:', existing)
