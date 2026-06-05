@@ -43,7 +43,6 @@ export async function pushMessage(to: string, messages: object[], accessToken: s
 // ==============================================
 function adminUrl(appointmentId?: number) {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  if (appointmentId) return `${base}/admin/appointments/${appointmentId}`
   return `${base}/admin`
 }
 
