@@ -51,8 +51,8 @@ export function CloseButton() {
 
   return (
     <button onClick={close}
-      className="bg-black text-white px-8 py-3 rounded-2xl text-sm font-bold">
-      ปิดหน้านี้
+      className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-2xl text-base font-bold active:scale-[0.98] transition-transform">
+      กลับไปหน้าแรก
     </button>
   )
 }
