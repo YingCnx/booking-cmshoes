@@ -15,6 +15,8 @@ async function checkGroupMembership(groupId: string, userId: string, accessToken
 
 export async function POST(req: Request) {
   const { lineUserId, displayName, groupId } = await req.json()
+  // 🔍 DEBUG: log LINE User ID เพื่อนำไปเพิ่มใน employees table
+  console.log(`[admin-auth] lineUserId=${lineUserId} displayName=${displayName} groupId=${groupId}`)
   if (!lineUserId || !groupId) {
     return NextResponse.json({ error: 'lineUserId และ groupId required' }, { status: 400 })
   }
