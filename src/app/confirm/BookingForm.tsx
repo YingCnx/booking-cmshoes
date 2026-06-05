@@ -165,7 +165,7 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
               </div>
             ) : (
               <textarea rows={3} value={location} onChange={e => setLocation(e.target.value)}
-                placeholder="บ้านเลขที่ ซอย ถนน ตำบล อำเภอ จังหวัด"
+                placeholder="พิกัด สถานที่ใกล้เคียง"
                 disabled={pending} className={`${inputCls} resize-none`} />
             )}
 
