@@ -33,11 +33,19 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
           })
         }
 
+        // ✅ ถ้ามี groupId จาก props ให้เก็บไว้ใน sessionStorage ก่อน LIFF redirect
+        if (groupId) {
+          sessionStorage.setItem('admin_group_id', groupId)
+        }
+
         await window.liff.init({ liffId, withLoginOnExternalBrowser: true })
 
-        // ✅ อ่าน groupId หลัง liff.init() เสร็จ เพราะ LIFF จะ restore liff.state ก่อน
+        // ✅ อ่าน groupId จาก URL → sessionStorage → props ตามลำดับ
         const urlParams = new URLSearchParams(window.location.search)
-        const resolvedGroupId = urlParams.get('groupId') || groupId
+        const resolvedGroupId =
+          urlParams.get('groupId') ||
+          sessionStorage.getItem('admin_group_id') ||
+          groupId
 
         if (!resolvedGroupId) {
           setStatus('no_group')
@@ -86,6 +94,7 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
           setError(data.error ?? 'ตรวจสอบสิทธิ์ไม่ผ่าน')
           return
         }
+        sessionStorage.removeItem('admin_group_id')
         setStatus('success')
         window.location.href = nextPath
       } catch (err: any) {
