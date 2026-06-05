@@ -47,7 +47,7 @@ export default async function ServicePage() {
           ร้านซักเกิบแอนด์สปา
         </p>
         <h1 className="text-3xl font-extrabold text-gray-900 leading-tight tracking-tight">
-          นัดรับรองเท้า
+          ทำความสะอาดรองเท้า
         </h1>
         <p className="mt-2 text-[#2ABFAB] font-semibold text-base">
           ดูแลโดยช่างมืออาชีพ
