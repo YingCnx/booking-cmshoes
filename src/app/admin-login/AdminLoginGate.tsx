@@ -65,6 +65,9 @@ export function AdminLoginGate({ liffId, groupId, nextPath }: Props) {
         let profile
         try {
           profile = await window.liff.getProfile()
+          // 🔍 DEBUG: แสดง LINE User ID ชั่วคราว (ลบออกหลังได้ข้อมูลครบ)
+          console.log('LINE User ID:', profile.userId, profile.displayName)
+          alert(`LINE User ID: ${profile.userId}\nชื่อ: ${profile.displayName}`)
         } catch (e: any) {
           const msg = String(e?.message || e)
           if (msg.toLowerCase().includes('expired') || msg.includes('access token')) {
