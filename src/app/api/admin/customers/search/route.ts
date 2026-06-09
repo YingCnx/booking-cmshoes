@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const q = searchParams.get('q')?.trim() ?? ''
 
   if (q.length < 2) {
-    return NextResponse.json([])
+    return NextResponse.json({ debug: 'too_short', q, qLen: q.length })
   }
 
   const supabase = await createClient()
@@ -35,5 +35,5 @@ export async function GET(req: Request) {
     return true
   })
 
-  return NextResponse.json(data)
+  return NextResponse.json({ debug: 'ok', q, byNameCount: byName?.length, byPhoneCount: byPhone?.length, data })
 }
