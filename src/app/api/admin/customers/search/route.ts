@@ -15,13 +15,13 @@ export async function GET(req: Request) {
 
   const [r1, r2] = await Promise.all([
     supabase.from('customers')
-      .select('id, name, phone, location, line_user_id')
+      .select('id, name, phone, line_user_id')
       .eq('branch_id', admin.branchId)
       .ilike('name', `%${q}%`)
       .order('name')
       .limit(20),
     supabase.from('customers')
-      .select('id, name, phone, location, line_user_id')
+      .select('id, name, phone, line_user_id')
       .eq('branch_id', admin.branchId)
       .ilike('phone', `%${q}%`)
       .order('name')
