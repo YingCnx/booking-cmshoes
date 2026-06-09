@@ -35,6 +35,10 @@ export function AdminHeader({ displayName, branchName }: Props) {
           className="text-xs text-gray-400 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg">
           👤 ลูกค้า
         </a>
+        <a href="/admin/line-contacts"
+          className="text-xs text-gray-400 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg">
+          💬 LINE
+        </a>
       </div>
     </header>
   )

@@ -53,6 +53,19 @@ export async function POST(req: Request, { params }: Props) {
       trigger,
     })
 
+    // บันทึก/อัปเดต line_contacts ทุกครั้งที่มีคนทัก
+    const lineUserId = event.source?.userId
+    if (lineUserId) {
+      const profile = event.source?.profile
+      await supabase.from('line_contacts').upsert({
+        branch_id: branch.id,
+        line_user_id: lineUserId,
+        display_name: profile?.displayName ?? null,
+        picture_url: profile?.pictureUrl ?? null,
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'branch_id,line_user_id' })
+    }
+
     if (trigger === 'เช็คสถานะ' || trigger === 'check_status') {
       await handleCheckStatus(event, branch, supabase)
     }
