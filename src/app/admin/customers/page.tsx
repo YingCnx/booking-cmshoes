@@ -49,7 +49,7 @@ export default async function CustomersPage({ searchParams }: Props) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
-        <CustomerSearch initialQuery={q ?? ''} customers={customers} />
+        <CustomerSearch customers={customers} />
       </div>
     </div>
   )
