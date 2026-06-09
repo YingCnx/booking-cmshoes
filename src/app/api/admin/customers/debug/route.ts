@@ -19,18 +19,20 @@ export async function GET() {
     .eq('branch_id', admin.branchId)
     .limit(3)
 
-  // ทดสอบ ilike
-  const { data: ilikeTest } = await supabase
-    .from('customers')
-    .select('id, name')
-    .eq('branch_id', admin.branchId)
-    .ilike('name', '%ส%')
-    .limit(3)
+  // ทดสอบ ilike เหมือน search API
+  const q = 'ying'
+  const [{ data: byName, error: nameErr }, { data: byPhone, error: phoneErr }] = await Promise.all([
+    supabase.from('customers').select('id, name, phone').eq('branch_id', admin.branchId).ilike('name', `%${q}%`).limit(5),
+    supabase.from('customers').select('id, name, phone').eq('branch_id', admin.branchId).ilike('phone', `%${q}%`).limit(5),
+  ])
 
   return NextResponse.json({
     branchId: admin.branchId,
     totalCustomers: count,
     sample,
-    ilikeTest,
+    byName,
+    byPhone,
+    nameErr: nameErr?.message,
+    phoneErr: phoneErr?.message,
   })
 }
