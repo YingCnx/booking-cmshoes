@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 
 type Customer = {
   id: number
@@ -11,27 +10,26 @@ type Customer = {
   line_user_id: string | null
 }
 
-type Props = {
-  initialQuery: string
-  customers: Customer[]
-}
-
-export function CustomerSearch({ initialQuery, customers }: Props) {
-  const router = useRouter()
-  const [query, setQuery] = useState(initialQuery)
+export function CustomerSearch() {
+  const [query, setQuery] = useState('')
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [searching, setSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
-    debounceRef.current = setTimeout(() => {
-      const q = query.trim()
-      if (q === initialQuery) return
-      if (q.length >= 2) {
-        router.push(`/admin/customers?q=${encodeURIComponent(q)}`)
-      } else if (q.length === 0) {
-        router.push('/admin/customers')
-      }
+    if (query.trim().length < 2) {
+      setCustomers([])
+      return
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true)
+      const res = await fetch(`/api/admin/customers/search?q=${encodeURIComponent(query.trim())}`)
+      const data = await res.json()
+      setCustomers(data)
+      setSearching(false)
     }, 300)
   }, [query])
 
@@ -47,7 +45,10 @@ export function CustomerSearch({ initialQuery, customers }: Props) {
           className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
           autoFocus
         />
-        {query && (
+        {searching && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">ค้นหา...</span>
+        )}
+        {!searching && query && (
           <button onClick={() => setQuery('')}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
             ✕
@@ -59,12 +60,15 @@ export function CustomerSearch({ initialQuery, customers }: Props) {
         <div className="text-center py-10 text-gray-600 text-sm">
           พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา
         </div>
-      ) : customers.length === 0 ? (
+      ) : customers.length === 0 && !searching ? (
         <div className="text-center py-10 text-gray-600 text-sm">
           ไม่พบ "{query}"
         </div>
       ) : (
         <div className="space-y-2">
+          {customers.length > 0 && (
+            <p className="text-xs text-gray-500 px-1">พบ {customers.length} รายการ</p>
+          )}
           {customers.map(c => (
             <div key={c.id}
               className="border border-gray-800 bg-gray-900 rounded-xl px-4 py-4 space-y-2">
