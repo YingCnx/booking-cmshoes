@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     .from('customers')
     .select('id, name, phone, location, line_user_id')
     .eq('branch_id', admin.branchId)
-    .or(`name.ilike.%${q}%,phone.ilike.%${q}%`)
+    .or(`name.ilike.*${q}*,phone.ilike.*${q}*`)
     .order('name')
     .limit(20)
 

@@ -19,7 +19,7 @@ export default async function CustomersPage({ searchParams }: Props) {
       .from('customers')
       .select('id, name, phone, location, line_user_id')
       .eq('branch_id', admin.branchId)
-      .or(`name.ilike.%${q.trim()}%,phone.ilike.%${q.trim()}%`)
+      .or(`name.ilike.*${q.trim()}*,phone.ilike.*${q.trim()}*`)
       .order('name')
       .limit(50)
 
