@@ -15,15 +15,20 @@ export default async function CustomersPage({ searchParams }: Props) {
   let customers: any[] = []
 
   if (q && q.trim().length >= 2) {
-    const { data } = await supabase
-      .from('customers')
-      .select('id, name, phone, location, line_user_id')
-      .eq('branch_id', admin.branchId)
-      .or(`name.ilike.*${q.trim()}*,phone.ilike.*${q.trim()}*`)
-      .order('name')
-      .limit(50)
+    const term = q.trim()
+    const [{ data: byName }, { data: byPhone }] = await Promise.all([
+      supabase.from('customers').select('id, name, phone, location, line_user_id')
+        .eq('branch_id', admin.branchId).ilike('name', `%${term}%`).order('name').limit(50),
+      supabase.from('customers').select('id, name, phone, location, line_user_id')
+        .eq('branch_id', admin.branchId).ilike('phone', `%${term}%`).order('name').limit(50),
+    ])
 
-    customers = data ?? []
+    const seen = new Set<number>()
+    customers = [...(byName ?? []), ...(byPhone ?? [])].filter((c: any) => {
+      if (seen.has(c.id)) return false
+      seen.add(c.id)
+      return true
+    })
   }
 
   return (
