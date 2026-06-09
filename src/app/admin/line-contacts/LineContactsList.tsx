@@ -24,6 +24,19 @@ export function LineContactsList({
 }) {
   const router = useRouter()
   const [active, setActive] = useState<Contact | null>(null)
+  const [unlinking, setUnlinking] = useState<number | null>(null)
+
+  async function handleUnlink(customerId: number) {
+    if (!confirm('ยกเลิกการผูกบัญชีนี้?')) return
+    setUnlinking(customerId)
+    await fetch('/api/admin/unlink-line', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerId }),
+    })
+    setUnlinking(null)
+    router.refresh()
+  }
 
   if (contacts.length === 0) {
     return (
@@ -64,7 +77,15 @@ export function LineContactsList({
               <div className="text-xs text-gray-600">
                 {new Date(c.last_seen_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
               </div>
-              {!c.customer && (
+              {c.customer ? (
+                <button
+                  onClick={() => handleUnlink(c.customer!.id)}
+                  disabled={unlinking === c.customer.id}
+                  className="text-xs border border-red-800 text-red-400 font-medium px-3 py-1.5 rounded-lg disabled:opacity-40"
+                >
+                  {unlinking === c.customer.id ? '...' : 'ยกเลิก'}
+                </button>
+              ) : (
                 <button
                   onClick={() => setActive(c)}
                   className="text-xs bg-white text-black font-medium px-3 py-1.5 rounded-lg"
