@@ -56,14 +56,32 @@ export async function POST(req: Request, { params }: Props) {
     // บันทึก/อัปเดต line_contacts ทุกครั้งที่มีคนทัก
     const lineUserId = event.source?.userId
     if (lineUserId) {
-      const profile = event.source?.profile
-      await supabase.from('line_contacts').upsert({
+      let displayName: string | null = null
+      let pictureUrl: string | null = null
+
+      // ดึง profile จาก LINE API
+      try {
+        const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${lineUserId}`, {
+          headers: { Authorization: `Bearer ${branch.line_access_token}` },
+        })
+        if (profileRes.ok) {
+          const p = await profileRes.json()
+          displayName = p.displayName ?? null
+          pictureUrl = p.pictureUrl ?? null
+        }
+      } catch {
+        // ไม่ได้ชื่อก็ยังบันทึก userId ได้
+      }
+
+      const { error: upsertError } = await supabase.from('line_contacts').upsert({
         branch_id: branch.id,
         line_user_id: lineUserId,
-        display_name: profile?.displayName ?? null,
-        picture_url: profile?.pictureUrl ?? null,
+        display_name: displayName,
+        picture_url: pictureUrl,
         last_seen_at: new Date().toISOString(),
       }, { onConflict: 'branch_id,line_user_id' })
+
+      if (upsertError) console.error('[line_contacts upsert]', upsertError)
     }
 
     if (trigger === 'เช็คสถานะ' || trigger === 'check_status') {
