@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect, useRef } from 'react'
+import { useState, useTransition } from 'react'
 
 type Customer = {
   id: number
@@ -11,35 +11,21 @@ type Customer = {
 type Props = {
   lineUserId: string
   displayName: string | null
+  customers: Customer[]
   onDone: () => void
   onClose: () => void
 }
 
-export function LinkContactModal({ lineUserId, displayName, onDone, onClose }: Props) {
+export function LinkContactModal({ lineUserId, displayName, customers, onDone, onClose }: Props) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<Customer[]>([])
-  const [searching, setSearching] = useState(false)
   const [selected, setSelected] = useState<Customer | null>(null)
   const [error, setError] = useState('')
   const [pending, startTransition] = useTransition()
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-
-    if (query.length < 2) {
-      setResults([])
-      return
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      setSearching(true)
-      const res = await fetch(`/api/admin/customers/search?q=${encodeURIComponent(query)}`)
-      const data = await res.json()
-      setResults(data)
-      setSearching(false)
-    }, 300)
-  }, [query])
+  const filtered = customers.filter(c => {
+    const q = query.toLowerCase()
+    return c.name?.toLowerCase().includes(q) || c.phone?.includes(q)
+  })
 
   function confirm() {
     if (!selected) return
@@ -62,7 +48,6 @@ export function LinkContactModal({ lineUserId, displayName, onDone, onClose }: P
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4">
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
           <div>
             <div className="font-bold">ผูกบัญชีลูกค้า</div>
@@ -72,30 +57,25 @@ export function LinkContactModal({ lineUserId, displayName, onDone, onClose }: P
         </div>
 
         <div className="p-4 space-y-3">
-          {/* Search */}
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔍</span>
             <input
               type="text"
               value={query}
               onChange={e => { setQuery(e.target.value); setSelected(null) }}
-              placeholder="พิมพ์ชื่อหรือเบอร์โทร..."
+              placeholder="ค้นหาชื่อหรือเบอร์โทร..."
               className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
               autoFocus
             />
-            {searching && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">กำลังค้นหา...</span>
-            )}
           </div>
 
-          {/* Results */}
           <div className="max-h-60 overflow-y-auto space-y-1.5">
-            {query.length < 2 ? (
-              <div className="text-center py-6 text-gray-600 text-sm">พิมพ์อย่างน้อย 2 ตัวอักษร</div>
-            ) : results.length === 0 && !searching ? (
+            {query.length === 0 ? (
+              <div className="text-center py-6 text-gray-600 text-sm">พิมพ์ชื่อหรือเบอร์เพื่อค้นหา</div>
+            ) : filtered.length === 0 ? (
               <div className="text-center py-6 text-gray-600 text-sm">ไม่พบ "{query}"</div>
             ) : (
-              results.map(c => (
+              filtered.slice(0, 20).map(c => (
                 <button
                   key={c.id}
                   onClick={() => setSelected(c)}
@@ -118,7 +98,6 @@ export function LinkContactModal({ lineUserId, displayName, onDone, onClose }: P
             </div>
           )}
 
-          {/* Confirm */}
           <button
             onClick={confirm}
             disabled={!selected || pending}
