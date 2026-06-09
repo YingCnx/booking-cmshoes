@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 
 type Customer = {
   id: number
@@ -10,32 +11,31 @@ type Customer = {
   line_user_id: string | null
 }
 
-export function CustomerSearch() {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<Customer[]>([])
-  const [searching, setSearching] = useState(false)
+type Props = {
+  initialQuery: string
+  customers: Customer[]
+}
+
+export function CustomerSearch({ initialQuery, customers }: Props) {
+  const router = useRouter()
+  const [query, setQuery] = useState(initialQuery)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
-    if (query.length < 2) {
-      setResults([])
-      return
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      setSearching(true)
-      const res = await fetch(`/api/admin/customers/search?q=${encodeURIComponent(query)}`)
-      const data = await res.json()
-      setResults(data)
-      setSearching(false)
+    debounceRef.current = setTimeout(() => {
+      const q = query.trim()
+      if (q.length >= 2) {
+        router.push(`/admin/customers?q=${encodeURIComponent(q)}`)
+      } else if (q.length === 0) {
+        router.push('/admin/customers')
+      }
     }, 300)
   }, [query])
 
   return (
     <div className="space-y-4">
-      {/* Search Input */}
       <div className="relative">
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔍</span>
         <input
@@ -43,12 +43,10 @@ export function CustomerSearch() {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="ค้นหาชื่อหรือเบอร์โทร..."
-          className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
+          className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
+          autoFocus
         />
-        {searching && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">กำลังค้นหา...</span>
-        )}
-        {!searching && query && (
+        {query && (
           <button onClick={() => setQuery('')}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
             ✕
@@ -56,21 +54,17 @@ export function CustomerSearch() {
         )}
       </div>
 
-      {/* Results */}
-      {query.length < 2 ? (
+      {query.trim().length < 2 ? (
         <div className="text-center py-10 text-gray-600 text-sm">
           พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา
         </div>
-      ) : results.length === 0 && !searching ? (
+      ) : customers.length === 0 ? (
         <div className="text-center py-10 text-gray-600 text-sm">
           ไม่พบ "{query}"
         </div>
       ) : (
         <div className="space-y-2">
-          {results.length > 0 && (
-            <p className="text-xs text-gray-500 px-1">พบ {results.length} รายการ</p>
-          )}
-          {results.map(c => (
+          {customers.map(c => (
             <div key={c.id}
               className="border border-gray-800 bg-gray-900 rounded-xl px-4 py-4 space-y-2">
               <div className="flex items-start justify-between gap-2">

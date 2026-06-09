@@ -1,11 +1,30 @@
 import { requireAdminSession } from '@/lib/admin-session'
+import { createClient } from '@/utils/supabase/server'
 import { CustomerSearch } from './CustomerSearch'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CustomersPage() {
-  await requireAdminSession()
+type Props = { searchParams: Promise<{ q?: string }> }
+
+export default async function CustomersPage({ searchParams }: Props) {
+  const admin = await requireAdminSession()
+  const { q } = await searchParams
+  const supabase = await createClient()
+
+  let customers: any[] = []
+
+  if (q && q.trim().length >= 2) {
+    const { data } = await supabase
+      .from('customers')
+      .select('id, name, phone, location, line_user_id')
+      .eq('branch_id', admin.branchId)
+      .or(`name.ilike.%${q.trim()}%,phone.ilike.%${q.trim()}%`)
+      .order('name')
+      .limit(50)
+
+    customers = data ?? []
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -17,12 +36,15 @@ export default async function CustomersPage() {
           </Link>
           <div>
             <h1 className="font-bold">ข้อมูลลูกค้า</h1>
+            {q && q.trim().length >= 2 && (
+              <p className="text-xs text-gray-500 mt-0.5">พบ {customers.length} รายการ</p>
+            )}
           </div>
         </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
-        <CustomerSearch />
+        <CustomerSearch initialQuery={q ?? ''} customers={customers} />
       </div>
     </div>
   )
