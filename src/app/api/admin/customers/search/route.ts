@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
   const supabase = await createClient()
 
-  const [{ data: byName }, { data: byPhone }] = await Promise.all([
+  const [r1, r2] = await Promise.all([
     supabase.from('customers')
       .select('id, name, phone, location, line_user_id')
       .eq('branch_id', admin.branchId)
@@ -29,11 +29,18 @@ export async function GET(req: Request) {
   ])
 
   const seen = new Set<number>()
-  const data = [...(byName ?? []), ...(byPhone ?? [])].filter((c: any) => {
+  const data = [...(r1.data ?? []), ...(r2.data ?? [])].filter((c: any) => {
     if (seen.has(c.id)) return false
     seen.add(c.id)
     return true
   })
 
-  return NextResponse.json({ debug: 'ok', q, byNameCount: byName?.length, byPhoneCount: byPhone?.length, data })
+  return NextResponse.json({
+    debug: 'ok', q,
+    r1Count: r1.data?.length,
+    r2Count: r2.data?.length,
+    r1Err: r1.error,
+    r2Err: r2.error,
+    data,
+  })
 }

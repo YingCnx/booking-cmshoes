@@ -27,8 +27,8 @@ export function CustomerSearch() {
     debounceRef.current = setTimeout(async () => {
       setSearching(true)
       const res = await fetch(`/api/admin/customers/search?q=${encodeURIComponent(query.trim())}`)
-      const data = await res.json()
-      setCustomers(data)
+      const json = await res.json()
+      setCustomers(json.data ?? [])
       setSearching(false)
     }, 300)
   }, [query])
