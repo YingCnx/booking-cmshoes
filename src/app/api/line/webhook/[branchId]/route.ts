@@ -56,21 +56,30 @@ export async function POST(req: Request, { params }: Props) {
     // บันทึก/อัปเดต line_contacts ทุกครั้งที่มีคนทัก
     const lineUserId = event.source?.userId
     if (lineUserId) {
-      let displayName: string | null = null
+      // เช็คว่ามีชื่ออยู่แล้วไหม ถ้ามีแล้วไม่ต้องเรียก LINE API ซ้ำ
+      const { data: existing } = await supabase
+        .from('line_contacts')
+        .select('display_name')
+        .eq('branch_id', branch.id)
+        .eq('line_user_id', lineUserId)
+        .maybeSingle()
+
+      let displayName: string | null = existing?.display_name ?? null
       let pictureUrl: string | null = null
 
-      // ดึง profile จาก LINE API
-      try {
-        const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${lineUserId}`, {
-          headers: { Authorization: `Bearer ${branch.line_access_token}` },
-        })
-        if (profileRes.ok) {
-          const p = await profileRes.json()
-          displayName = p.displayName ?? null
-          pictureUrl = p.pictureUrl ?? null
+      if (!existing?.display_name) {
+        try {
+          const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${lineUserId}`, {
+            headers: { Authorization: `Bearer ${branch.line_access_token}` },
+          })
+          if (profileRes.ok) {
+            const p = await profileRes.json()
+            displayName = p.displayName ?? null
+            pictureUrl = p.pictureUrl ?? null
+          }
+        } catch {
+          // ไม่ได้ชื่อก็ยังบันทึก userId ได้
         }
-      } catch {
-        // ไม่ได้ชื่อก็ยังบันทึก userId ได้
       }
 
       const { error: upsertError } = await supabase.from('line_contacts').upsert({
