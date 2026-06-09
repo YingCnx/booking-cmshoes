@@ -1,6 +1,7 @@
 import { requireAdminSession } from '@/lib/admin-session'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import { LineContactsList } from './LineContactsList'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,18 +11,22 @@ export default async function LineContactsPage() {
 
   const { data: contacts } = await supabase
     .from('line_contacts')
-    .select(`
-      id, line_user_id, display_name, picture_url, last_seen_at
-    `)
+    .select('id, line_user_id, display_name, picture_url, last_seen_at')
     .eq('branch_id', admin.branchId)
     .order('last_seen_at', { ascending: false })
 
-  // ดึง customers ที่ผูก line_user_id แล้ว เพื่อ join ฝั่ง JS
   const { data: linked } = await supabase
     .from('customers')
     .select('id, name, phone, line_user_id')
     .eq('branch_id', admin.branchId)
     .not('line_user_id', 'is', null)
+
+  // ลูกค้าทั้งหมดสำหรับ search ตอนผูก
+  const { data: allCustomers } = await supabase
+    .from('customers')
+    .select('id, name, phone')
+    .eq('branch_id', admin.branchId)
+    .order('name')
 
   const linkedMap = new Map((linked ?? []).map((c: any) => [c.line_user_id, c]))
 
@@ -62,48 +67,7 @@ export default async function LineContactsPage() {
           </div>
         </div>
 
-        {/* List */}
-        {list.length === 0 ? (
-          <div className="border border-gray-800 bg-gray-900 rounded-xl px-5 py-10 text-center text-gray-600 text-sm">
-            ยังไม่มีใครทักเข้ามา
-          </div>
-        ) : (
-          <div className="border border-gray-800 rounded-xl overflow-hidden divide-y divide-gray-800">
-            {list.map((c: any) => (
-              <div key={c.id} className="flex items-center gap-3 px-4 py-3.5 bg-gray-900">
-                {/* Avatar */}
-                {c.picture_url ? (
-                  <img src={c.picture_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 text-gray-400 text-sm">
-                    {c.display_name?.[0] ?? '?'}
-                  </div>
-                )}
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">
-                    {c.display_name ?? 'ไม่ทราบชื่อ'}
-                  </div>
-                  {c.customer ? (
-                    <div className="text-xs text-emerald-400 mt-0.5 truncate">
-                      ผูกแล้ว · {c.customer.name} · {c.customer.phone}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-amber-500 mt-0.5">ยังไม่ผูกบัญชี</div>
-                  )}
-                </div>
-
-                {/* Last seen */}
-                <div className="text-xs text-gray-600 flex-shrink-0 text-right">
-                  {new Date(c.last_seen_at).toLocaleDateString('th-TH', {
-                    day: 'numeric', month: 'short',
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <LineContactsList contacts={list} customers={allCustomers ?? []} />
       </div>
     </div>
   )
