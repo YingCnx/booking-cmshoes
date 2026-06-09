@@ -6,6 +6,7 @@ type Customer = {
   id: number
   name: string
   phone: string
+  address: string | null
   line_user_id: string | null
 }
 
@@ -83,6 +84,11 @@ export function CustomerSearch() {
                 className="flex items-center gap-2 text-sm text-blue-400">
                 📞 {c.phone}
               </a>
+              {c.address && (
+                <div className="text-sm text-gray-400 truncate">
+                  📍 {c.address}
+                </div>
+              )}
             </div>
           ))}
         </div>
