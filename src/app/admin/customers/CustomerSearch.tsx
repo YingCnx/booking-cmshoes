@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 type Customer = {
   id: number
@@ -12,24 +12,21 @@ type Customer = {
 }
 
 type Props = {
+  initialQuery: string
   customers: Customer[]
 }
 
-export function CustomerSearch({ customers }: Props) {
+export function CustomerSearch({ initialQuery, customers }: Props) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [query, setQuery] = useState(searchParams.get('q') ?? '')
+  const [query, setQuery] = useState(initialQuery)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    setQuery(searchParams.get('q') ?? '')
-  }, [searchParams])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(() => {
       const q = query.trim()
+      if (q === initialQuery) return
       if (q.length >= 2) {
         router.push(`/admin/customers?q=${encodeURIComponent(q)}`)
       } else if (q.length === 0) {
