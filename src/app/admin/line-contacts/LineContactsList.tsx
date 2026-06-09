@@ -13,7 +13,9 @@ type Contact = {
   customer: { id: number; name: string; phone: string } | null
 }
 
-export function LineContactsList({ contacts }: { contacts: Contact[] }) {
+type Customer = { id: number; name: string; phone: string }
+
+export function LineContactsList({ contacts, customers }: { contacts: Contact[], customers: Customer[] }) {
   const router = useRouter()
   const [active, setActive] = useState<Contact | null>(null)
   const [unlinking, setUnlinking] = useState<number | null>(null)
@@ -94,6 +96,7 @@ export function LineContactsList({ contacts }: { contacts: Contact[] }) {
         <LinkContactModal
           lineUserId={active.line_user_id}
           displayName={active.display_name}
+          customers={customers}
           onClose={() => setActive(null)}
           onDone={() => {
             setActive(null)

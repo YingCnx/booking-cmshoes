@@ -21,6 +21,12 @@ export default async function LineContactsPage() {
     .eq('branch_id', admin.branchId)
     .not('line_user_id', 'is', null)
 
+  const { data: allCustomers } = await supabase
+    .from('customers')
+    .select('id, name, phone')
+    .eq('branch_id', admin.branchId)
+    .order('name')
+
   const linkedMap = new Map((linked ?? []).map((c: any) => [c.line_user_id, c]))
 
   const list = (contacts ?? []).map((c: any) => ({
@@ -60,7 +66,7 @@ export default async function LineContactsPage() {
           </div>
         </div>
 
-        <LineContactsList contacts={list} />
+        <LineContactsList contacts={list} customers={allCustomers ?? []} />
       </div>
     </div>
   )
