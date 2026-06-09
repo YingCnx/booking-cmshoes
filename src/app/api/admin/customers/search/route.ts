@@ -13,13 +13,27 @@ export async function GET(req: Request) {
 
   const supabase = await createClient()
 
-  const { data } = await supabase
-    .from('customers')
-    .select('id, name, phone, location, line_user_id')
-    .eq('branch_id', admin.branchId)
-    .or(`name.ilike.*${q}*,phone.ilike.*${q}*`)
-    .order('name')
-    .limit(20)
+  const [{ data: byName }, { data: byPhone }] = await Promise.all([
+    supabase.from('customers')
+      .select('id, name, phone, location, line_user_id')
+      .eq('branch_id', admin.branchId)
+      .ilike('name', `%${q}%`)
+      .order('name')
+      .limit(20),
+    supabase.from('customers')
+      .select('id, name, phone, location, line_user_id')
+      .eq('branch_id', admin.branchId)
+      .ilike('phone', `%${q}%`)
+      .order('name')
+      .limit(20),
+  ])
 
-  return NextResponse.json(data ?? [])
+  const seen = new Set<number>()
+  const data = [...(byName ?? []), ...(byPhone ?? [])].filter((c: any) => {
+    if (seen.has(c.id)) return false
+    seen.add(c.id)
+    return true
+  })
+
+  return NextResponse.json(data)
 }
