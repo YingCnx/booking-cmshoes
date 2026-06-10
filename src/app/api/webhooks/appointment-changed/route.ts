@@ -28,8 +28,6 @@ export async function POST(req: Request) {
   const payload = await req.json()
   const { type, table, record, old_record } = payload
 
-  console.log('[webhook] received:', { type, table, id: record?.id, oldStatus: old_record?.status, newStatus: record?.status })
-
   // เช็คว่าเป็น UPDATE บน appointments + status เปลี่ยนจริง
   if (type !== 'UPDATE' || table !== 'appointments') {
     return NextResponse.json({ ok: true, skipped: 'not appointment update' })
@@ -86,7 +84,6 @@ export async function POST(req: Request) {
         })],
         creds.accessToken
       )
-      console.log('[webhook] → admin group notified')
     } catch (err) {
       console.error('[webhook] admin notify failed:', err)
     }
@@ -95,7 +92,6 @@ export async function POST(req: Request) {
   // ✅ แจ้งลูกค้า เฉพาะ ยืนยันแล้ว / ยกเลิก
   if (lineUserId && (newStatus === 'ยืนยันแล้ว' || newStatus === 'ยกเลิก')) {
     const notifyType = newStatus === 'ยืนยันแล้ว' ? 'booking_confirmed' : 'booking_cancelled'
-    console.log('[webhook] → notify customer:', { notifyType, lineUserId })
     try {
       const res = await fetch(notifyUrl, {
         method: 'POST',
@@ -110,10 +106,10 @@ export async function POST(req: Request) {
             time: String(apt.appointment_time).slice(0, 5),
             location: apt.location,
             shoeCount: apt.shoe_count,
+            ...(newStatus === 'ยกเลิก' && record.cancel_reason ? { reason: record.cancel_reason } : {}),
           },
         }),
       })
-      console.log('[webhook] customer notify response:', res.status)
     } catch (err) {
       console.error('[webhook] customer notify failed:', err)
     }

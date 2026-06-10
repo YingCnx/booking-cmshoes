@@ -87,6 +87,8 @@ export default async function AppointmentDetailPage({ params }: Props) {
           appointmentType={apt.appointment_type ?? 'pickup'}
           lineUserId={(apt.customers as any)?.line_user_id ?? null}
           branchId={admin.branchId}
+          appointmentDate={apt.appointment_date}
+          appointmentTime={String(apt.appointment_time).slice(0, 5)}
           notifyData={{
             serviceName: (apt.services as any)?.service_name ?? '',
             date: apt.appointment_date,

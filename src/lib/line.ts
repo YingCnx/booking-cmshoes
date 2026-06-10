@@ -113,8 +113,20 @@ export function buildAdminStatusChangeFlex(data: {
 }
 
 // ==============================================
-// Flex Templates (kilo size, สีดำ)
+// Flex Templates
 // ==============================================
+function flexRow(label: string, value: string | number | null | undefined) {
+  const safe = (value === null || value === undefined || value === '') ? '-' : String(value)
+  return {
+    type: 'box',
+    layout: 'horizontal',
+    contents: [
+      { type: 'text', text: label, color: '#6B7280', size: 'sm', flex: 3 },
+      { type: 'text', text: safe, color: '#111827', size: 'sm', weight: 'bold', flex: 5, align: 'end', wrap: true },
+    ],
+  }
+}
+
 function compactRow(label: string, value: string | number | null | undefined) {
   const safe = (value === null || value === undefined || value === '') ? '-' : String(value)
   return {
@@ -218,31 +230,49 @@ export function buildBookingPendingFlex(data: {
     contents: {
       type: 'bubble',
       size: 'kilo',
+      styles: { header: { separator: true }, body: { backgroundColor: '#FFFFFF' } },
       header: {
-        type: 'box', layout: 'vertical',
-        backgroundColor: '#18181B',
-        paddingAll: '12px',
+        type: 'box', layout: 'vertical', paddingAll: '0px',
         contents: [
-          { type: 'text', text: 'รอการยืนยัน', color: '#FBBF24', size: 'xxs', weight: 'bold' },
-          { type: 'text', text: 'ส่งคำขอจองสำเร็จ', color: '#FFFFFF', size: 'md', weight: 'bold', margin: 'xs' },
+          { type: 'box', layout: 'vertical', height: '4px', backgroundColor: '#D97706', contents: [] },
         ],
       },
       body: {
-        type: 'box', layout: 'vertical', paddingAll: '10px', spacing: 'xs',
+        type: 'box', layout: 'vertical', paddingAll: '20px',
         contents: [
-          compactRow('บริการ', data.serviceName),
-          compactRow('วันที่', dateLabel),
-          compactRow('เวลา', `${data.time} น.`),
-          { type: 'separator', margin: 'sm' },
-          compactRow('สถานที่รับ', data.location),
-          compactRow('จำนวน', `${data.shoeCount} คู่`),
-        ],
-      },
-      footer: {
-        type: 'box', layout: 'vertical', paddingAll: '10px',
-        backgroundColor: '#FEFCE8',
-        contents: [
-          { type: 'text', text: 'ร้านจะแจ้งผลยืนยันให้ทราบโดยเร็ว', color: '#92400E', size: 'xxs', align: 'center' },
+          { type: 'text', text: 'ร้านซักเกิบแอนด์สปา', size: 'sm', color: '#6B7280' },
+          {
+            type: 'box', layout: 'horizontal', margin: 'sm', alignItems: 'center',
+            contents: [
+              { type: 'text', text: 'คำขอนัดหมาย', size: 'md', weight: 'bold', color: '#111827', flex: 1, wrap: true },
+              {
+                type: 'box', layout: 'vertical',
+                backgroundColor: '#FEF3C7', cornerRadius: '16px',
+                paddingStart: '10px', paddingEnd: '10px', paddingTop: '4px', paddingBottom: '4px', flex: 0,
+                contents: [{ type: 'text', text: 'รอการยืนยัน', size: 'xs', weight: 'bold', color: '#92400E' }],
+              },
+            ],
+          },
+          { type: 'text', text: 'กรุณารอการยืนยันจากทางร้านสักครู่..', size: 'xs', color: '#4e4f52', margin: 'lg', wrap: true },
+          { type: 'box', layout: 'vertical', height: '1px', backgroundColor: '#E5E7EB', margin: 'lg', contents: [] },
+          {
+            type: 'box', layout: 'vertical', margin: 'lg', spacing: 'md',
+            contents: [
+              flexRow('บริการ', data.serviceName),
+              flexRow('วันที่', dateLabel),
+              flexRow('เวลา', `${data.time} น.`),
+              { type: 'separator', color: '#E5E7EB' },
+              flexRow('สถานที่รับ', data.location),
+              flexRow('จำนวน', `${data.shoeCount} คู่`),
+            ],
+          },
+          {
+            type: 'box', layout: 'vertical', margin: 'xl', paddingAll: '12px',
+            backgroundColor: '#F9FAFB', cornerRadius: '10px',
+            contents: [
+              { type: 'text', text: 'ร้านจะแจ้งผลยืนยันให้ทราบโดยเร็ว', size: 'xs', color: '#6B7280', align: 'center', wrap: true },
+            ],
+          },
         ],
       },
     },
@@ -267,24 +297,49 @@ export function buildBookingConfirmedFlex(data: {
     contents: {
       type: 'bubble',
       size: 'kilo',
+      styles: { header: { separator: true }, body: { backgroundColor: '#FFFFFF' } },
       header: {
-        type: 'box', layout: 'vertical',
-        backgroundColor: '#052E16',
-        paddingAll: '12px',
+        type: 'box', layout: 'vertical', paddingAll: '0px',
         contents: [
-          { type: 'text', text: 'ยืนยันการจอง', color: '#4ADE80', size: 'xxs', weight: 'bold' },
-          { type: 'text', text: 'นัดหมายได้รับการยืนยันแล้ว', color: '#FFFFFF', size: 'md', weight: 'bold', margin: 'xs', wrap: true },
+          { type: 'box', layout: 'vertical', height: '4px', backgroundColor: '#059669', contents: [] },
         ],
       },
       body: {
-        type: 'box', layout: 'vertical', paddingAll: '10px', spacing: 'xs',
+        type: 'box', layout: 'vertical', paddingAll: '20px',
         contents: [
-          compactRow('บริการ', data.serviceName),
-          compactRow('วันที่', dateLabel),
-          compactRow('เวลา', `${data.time} น.`),
-          { type: 'separator', margin: 'sm' },
-          compactRow('สถานที่รับ', data.location),
-          compactRow('จำนวน', `${data.shoeCount} คู่`),
+          { type: 'text', text: 'ร้านซักเกิบแอนด์สปา', size: 'sm', color: '#6B7280' },
+          {
+            type: 'box', layout: 'horizontal', margin: 'sm', alignItems: 'center',
+            contents: [
+              { type: 'text', text: 'ยืนยันนัดหมายแล้ว', size: 'md', weight: 'bold', color: '#111827', flex: 1, wrap: true },
+              {
+                type: 'box', layout: 'vertical',
+                backgroundColor: '#D1FAE5', cornerRadius: '16px',
+                paddingStart: '10px', paddingEnd: '10px', paddingTop: '4px', paddingBottom: '4px', flex: 0,
+                contents: [{ type: 'text', text: 'ยืนยันแล้ว', size: 'xs', weight: 'bold', color: '#065F46' }],
+              },
+            ],
+          },
+          { type: 'text', text: 'ทางร้านยืนยันการนัดหมายของคุณแล้ว', size: 'xs', color: '#4e4f52', margin: 'lg', wrap: true },
+          { type: 'box', layout: 'vertical', height: '1px', backgroundColor: '#E5E7EB', margin: 'lg', contents: [] },
+          {
+            type: 'box', layout: 'vertical', margin: 'lg', spacing: 'md',
+            contents: [
+              flexRow('บริการ', data.serviceName),
+              flexRow('วันที่', dateLabel),
+              flexRow('เวลา', `${data.time} น.`),
+              { type: 'separator', color: '#E5E7EB' },
+              flexRow('สถานที่รับ', data.location),
+              flexRow('จำนวน', `${data.shoeCount} คู่`),
+            ],
+          },
+          {
+            type: 'box', layout: 'vertical', margin: 'xl', paddingAll: '12px',
+            backgroundColor: '#F0FDF4', cornerRadius: '10px',
+            contents: [
+              { type: 'text', text: 'ทางร้านจะติดต่อหาคุณก่อนเข้ารับรองเท้า', size: 'xs', color: '#065F46', align: 'center', wrap: true },
+            ],
+          },
         ],
       },
     },
@@ -308,21 +363,53 @@ export function buildBookingCancelledFlex(data: {
     contents: {
       type: 'bubble',
       size: 'kilo',
+      styles: { header: { separator: true }, body: { backgroundColor: '#FFFFFF' } },
       header: {
-        type: 'box', layout: 'vertical',
-        backgroundColor: '#7F1D1D',
-        paddingAll: '12px',
+        type: 'box', layout: 'vertical', paddingAll: '0px',
         contents: [
-          { type: 'text', text: 'ยกเลิก', color: '#FCA5A5', size: 'xxs', weight: 'bold' },
-          { type: 'text', text: 'การจองถูกยกเลิก', color: '#FFFFFF', size: 'md', weight: 'bold', margin: 'xs' },
+          { type: 'box', layout: 'vertical', height: '4px', backgroundColor: '#DC2626', contents: [] },
         ],
       },
       body: {
-        type: 'box', layout: 'vertical', paddingAll: '10px', spacing: 'xs',
+        type: 'box', layout: 'vertical', paddingAll: '20px',
         contents: [
-          compactRow('บริการ', data.serviceName),
-          compactRow('วันที่', `${dateLabel} · ${data.time} น.`),
-          ...(data.reason ? [compactRow('เหตุผล', data.reason)] : []),
+          { type: 'text', text: 'ร้านซักเกิบแอนด์สปา', size: 'sm', color: '#6B7280' },
+          {
+            type: 'box', layout: 'horizontal', margin: 'sm', alignItems: 'center',
+            contents: [
+              { type: 'text', text: 'ยกเลิกนัดหมาย', size: 'md', weight: 'bold', color: '#111827', flex: 1, wrap: true },
+              {
+                type: 'box', layout: 'vertical',
+                backgroundColor: '#FEE2E2', cornerRadius: '16px',
+                paddingStart: '10px', paddingEnd: '10px', paddingTop: '4px', paddingBottom: '4px', flex: 0,
+                contents: [{ type: 'text', text: 'ยกเลิกแล้ว', size: 'xs', weight: 'bold', color: '#991B1B' }],
+              },
+            ],
+          },
+          { type: 'text', text: 'การนัดหมายของคุณถูกยกเลิกแล้ว', size: 'xs', color: '#4e4f52', margin: 'lg', wrap: true },
+          { type: 'box', layout: 'vertical', height: '1px', backgroundColor: '#E5E7EB', margin: 'lg', contents: [] },
+          {
+            type: 'box', layout: 'vertical', margin: 'lg', spacing: 'md',
+            contents: [
+              flexRow('บริการ', data.serviceName),
+              flexRow('วันที่', dateLabel),
+              flexRow('เวลา', `${data.time} น.`),
+              ...(data.reason ? [
+                { type: 'separator', color: '#E5E7EB' },
+                { ...flexRow('เหตุผล', data.reason), contents: [
+                  { type: 'text', text: 'เหตุผล', size: 'sm', color: '#6B7280', flex: 3 },
+                  { type: 'text', text: data.reason, size: 'sm', weight: 'bold', color: '#DC2626', align: 'end', flex: 5, wrap: true },
+                ]},
+              ] : []),
+            ],
+          },
+          {
+            type: 'box', layout: 'vertical', margin: 'xl', paddingAll: '12px',
+            backgroundColor: '#FEF2F2', cornerRadius: '10px',
+            contents: [
+              { type: 'text', text: 'หากมีข้อสงสัยสามารถสอบถามได้ทางข้อความ', size: 'xs', color: '#991B1B', align: 'center', wrap: true },
+            ],
+          },
         ],
       },
     },

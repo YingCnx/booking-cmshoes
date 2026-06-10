@@ -47,12 +47,6 @@ export async function POST(req: Request, { params }: Props) {
       event.postback?.data ??
       (event.type === 'message' && event.message?.type === 'text' ? event.message.text : null)
 
-    console.log(`[webhook ${branch.name}]`, {
-      type: event.type,
-      userId: event.source?.userId ?? '-',
-      trigger,
-    })
-
     // บันทึก/อัปเดต line_contacts ทุกครั้งที่มีคนทัก
     const lineUserId = event.source?.userId
     if (lineUserId) {
@@ -135,8 +129,6 @@ async function handleCheckStatus(event: any, branch: any, supabase: any) {
     .in('status', ACTIVE_QUEUE_STATUSES as any)
     .order('received_date', { ascending: false })
     .limit(1)
-  console.log('[handleCheckStatus] customer:', customer.id, 'queues:', queues?.length ?? 0)
-
   if (!queues || queues.length === 0) {
     await replyMessage(replyToken, [buildNoQueueFlex()], branch.line_access_token)
     return

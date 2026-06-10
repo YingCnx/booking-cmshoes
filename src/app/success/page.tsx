@@ -96,9 +96,9 @@ export default async function SuccessPage({ searchParams }: Props) {
           <h2 className="font-bold text-gray-900 mb-4">สิ่งที่คุณควรรู้</h2>
           <div className="space-y-4">
             {[
-              { icon: <Truck className="w-5 h-5 text-[#2ABFAB]" />, bg: 'bg-[#2ABFAB]/10', title: 'เตรียมรองเท้าให้พร้อม', desc: 'ทำความสะอาดคราบนอกก่อน (ถ้ามี)' },
-              { icon: <Clock className="w-5 h-5 text-blue-500" />, bg: 'bg-blue-50', title: 'รอรับรองเท้า', desc: 'เจ้าหน้าที่จะติดต่อคุณก่อนเข้ารับ 30-60 นาที' },
-              { icon: <Scissors className="w-5 h-5 text-purple-500" />, bg: 'bg-purple-50', title: 'ระยะเวลาดำเนินการ', desc: 'โดยประมาณ 2-3 วันทำการ' },
+              { icon: <Truck className="w-5 h-5 text-[#2ABFAB]" />, bg: 'bg-[#2ABFAB]/10', title: 'เตรียมรองเท้าให้พร้อม', desc: 'ถ่ายรูปก่อนส่งเป็นหลักฐาน' },
+              { icon: <Clock className="w-5 h-5 text-blue-500" />, bg: 'bg-blue-50', title: 'รอส่งรองเท้าตามนัดหมาย', desc: 'เจ้าหน้าที่จะติดต่อคุณก่อนเข้ารับ 30-60 นาที' },
+              { icon: <Scissors className="w-5 h-5 text-purple-500" />, bg: 'bg-purple-50', title: 'ระยะเวลาดำเนินการ', desc: 'โดยประมาณ 3-5 วันทำการ' },
             ].map(({ icon, bg, title, desc }) => (
               <div key={title} className="flex items-start gap-3">
                 <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center flex-shrink-0`}>

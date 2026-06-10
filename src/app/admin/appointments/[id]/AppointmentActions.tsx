@@ -8,6 +8,8 @@ type Props = {
   appointmentType: string
   lineUserId: string | null
   branchId: number
+  appointmentDate: string
+  appointmentTime: string
   notifyData: {
     serviceName: string
     date: string
@@ -53,10 +55,39 @@ const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
   },
 }
 
-export function AppointmentActions({ appointmentId, currentStatus, appointmentType, lineUserId, branchId, notifyData }: Props) {
+export function AppointmentActions({ appointmentId, currentStatus, appointmentType, lineUserId, branchId, appointmentDate, appointmentTime, notifyData }: Props) {
   const [pendingAction, setPendingAction] = useState<ActionType>(null)
+  const [cancelReason, setCancelReason] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showReschedule, setShowReschedule] = useState(false)
+  const [newDate, setNewDate] = useState(appointmentDate)
+  const [newTime, setNewTime] = useState(appointmentTime)
+  const [rescheduleLoading, setRescheduleLoading] = useState(false)
+  const [rescheduleError, setRescheduleError] = useState('')
+
+  async function executeReschedule() {
+    if (!newDate || !newTime) return
+    setRescheduleLoading(true)
+    setRescheduleError('')
+    try {
+      const res = await fetch('/api/admin/reschedule', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId, date: newDate, time: newTime }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setRescheduleError(data.error ?? 'อัปเดตไม่สำเร็จ')
+        setRescheduleLoading(false)
+        return
+      }
+      window.location.reload()
+    } catch {
+      setRescheduleError('เกิดข้อผิดพลาด')
+      setRescheduleLoading(false)
+    }
+  }
 
   async function executeAction() {
     if (!pendingAction) return
@@ -73,6 +104,7 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentTy
           lineUserId,
           branchId,
           notifyData,
+          ...(pendingAction === 'cancel' && cancelReason.trim() ? { reason: cancelReason.trim() } : {}),
         }),
       })
       if (!res.ok) {
@@ -99,12 +131,18 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentTy
     <>
       <div className="space-y-2">
 
-        {/* รอดำเนินการ → ยืนยัน */}
+        {/* รอดำเนินการ → ยืนยัน + เปลี่ยนเวลา */}
         {currentStatus === 'รอดำเนินการ' && (
-          <button onClick={() => setPendingAction('confirm')}
-            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
-            ✓ ยืนยันการจอง
-          </button>
+          <>
+            <button onClick={() => setPendingAction('confirm')}
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">
+              ✓ ยืนยันการจอง
+            </button>
+            <button onClick={() => setShowReschedule(true)}
+              className="w-full py-3 border border-zinc-700 text-zinc-300 font-medium rounded-2xl hover:bg-zinc-800 transition">
+              ⏰ เปลี่ยนวันเวลา
+            </button>
+          </>
         )}
 
         {/* ยืนยันแล้ว + นัดรับ → รับรองเท้าแล้ว */}
@@ -142,6 +180,47 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentTy
         )}
       </div>
 
+      {/* Reschedule Modal */}
+      {showReschedule && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0"
+          style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-2xl overflow-hidden">
+            <div className="px-5 py-5 space-y-4">
+              <h3 className="text-lg font-bold text-white">เปลี่ยนวันเวลา</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1.5">วันที่ใหม่</label>
+                  <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)}
+                    disabled={rescheduleLoading}
+                    className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-500 disabled:opacity-50" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1.5">เวลาใหม่</label>
+                  <input type="time" value={newTime} onChange={e => setNewTime(e.target.value)}
+                    disabled={rescheduleLoading}
+                    className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-500 disabled:opacity-50" />
+                </div>
+              </div>
+              {rescheduleError && (
+                <p className="text-sm text-red-400 bg-red-950/30 border border-red-800 rounded-xl px-3 py-2">
+                  {rescheduleError}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2 px-5 pb-5">
+              <button onClick={() => { setShowReschedule(false); setRescheduleError('') }} disabled={rescheduleLoading}
+                className="flex-1 py-3 border border-zinc-700 text-zinc-400 text-sm font-medium rounded-xl disabled:opacity-50">
+                กลับ
+              </button>
+              <button onClick={executeReschedule} disabled={rescheduleLoading || !newDate || !newTime}
+                className="flex-1 py-3 bg-zinc-600 hover:bg-zinc-500 text-white text-sm font-bold rounded-xl disabled:opacity-50 transition">
+                {rescheduleLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confirm Modal */}
       {pendingAction && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0"
@@ -152,9 +231,19 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentTy
               <p className="text-sm text-zinc-400 mt-2 leading-relaxed">
                 {ACTION_CONFIG[pendingAction].desc}
               </p>
+              {pendingAction === 'cancel' && (
+                <textarea
+                  value={cancelReason}
+                  onChange={e => setCancelReason(e.target.value.slice(0, 200))}
+                  placeholder="เหตุผลการยกเลิก (ถ้ามี)"
+                  rows={3}
+                  disabled={loading}
+                  className="mt-3 w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 resize-none disabled:opacity-50"
+                />
+              )}
             </div>
             <div className="flex gap-2 px-5 pb-5">
-              <button onClick={() => setPendingAction(null)} disabled={loading}
+              <button onClick={() => { setPendingAction(null); setCancelReason('') }} disabled={loading}
                 className="flex-1 py-3 border border-zinc-700 text-zinc-400 text-sm font-medium rounded-xl disabled:opacity-50">
                 กลับ
               </button>

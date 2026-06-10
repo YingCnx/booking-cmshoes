@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 
 export async function PATCH(req: Request) {
-  const { appointmentId, status } = await req.json()
-
-  console.log('[booking-status] ▶ request:', { appointmentId, status })
+  const { appointmentId, status, reason } = await req.json()
 
   const allowed = ['รอดำเนินการ', 'ยืนยันแล้ว', 'เสร็จสิ้น', 'สำเร็จ', 'ยกเลิก']
   if (!appointmentId || !allowed.includes(status)) {
@@ -12,17 +10,18 @@ export async function PATCH(req: Request) {
   }
 
   const supabase = await createClient()
+  const updatePayload: Record<string, unknown> = { status, updated_at: new Date().toISOString() }
+  if (status === 'ยกเลิก' && reason) updatePayload.cancel_reason = reason
+
   const { error } = await supabase
     .from('appointments')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq('id', appointmentId)
 
   if (error) {
     console.error('[booking-status] ✗ update error:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
-  console.log('[booking-status] ✓ status updated — LINE notify will be triggered by Supabase webhook')
 
   return NextResponse.json({ ok: true })
 }
