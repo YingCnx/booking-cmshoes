@@ -6,6 +6,7 @@ import {
   buildBookingPendingFlex,
   buildBookingConfirmedFlex,
   buildBookingCancelledFlex,
+  buildShoeReceivedFlex,
 } from '@/lib/line'
 
 export async function POST(req: Request) {
@@ -38,6 +39,11 @@ export async function POST(req: Request) {
   } else if (type === 'booking_cancelled') {
     if (data.lineUserId) {
       await pushMessage(data.lineUserId, [buildBookingCancelledFlex(data)], creds.accessToken)
+    }
+  } else if (type === 'shoe_received') {
+    if (data.lineUserId) {
+      const liffUrl = creds.liffId ? `https://liff.line.me/${creds.liffId}` : ''
+      await pushMessage(data.lineUserId, [buildShoeReceivedFlex({ ...data, liffUrl })], creds.accessToken)
     }
   }
 

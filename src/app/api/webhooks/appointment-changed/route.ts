@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { getBranchLineCredentials, pushMessage, buildAdminStatusChangeFlex } from '@/lib/line'
+import { getBranchLineCredentials, pushMessage } from '@/lib/line'
 
 // ============================================
 // Supabase Database Webhook
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   }
 
   // เช็คว่า status ใหม่ เป็น สถานะที่ต้องแจ้งลูกค้า
-  if (newStatus !== 'ยืนยันแล้ว' && newStatus !== 'ยกเลิก') {
+  if (!['ยืนยันแล้ว', 'ยกเลิก', 'สำเร็จ'].includes(newStatus)) {
     return NextResponse.json({ ok: true, skipped: `status ${newStatus} not notify` })
   }
 
@@ -68,32 +68,13 @@ export async function POST(req: Request) {
   const serviceName = (apt.services as any)?.service_name ?? 'นัดรับรองเท้า'
   const notifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/line/notify`
 
-  // ✅ แจ้ง admin group ทุกครั้งที่สถานะเปลี่ยน
-  if (creds.adminGroupId && creds.accessToken) {
+  // ✅ แจ้งลูกค้า เฉพาะ ยืนยันแล้ว / ยกเลิก / สำเร็จ
+  if (lineUserId && ['ยืนยันแล้ว', 'ยกเลิก', 'สำเร็จ'].includes(newStatus)) {
+    const notifyType = newStatus === 'ยืนยันแล้ว' ? 'booking_confirmed'
+      : newStatus === 'ยกเลิก' ? 'booking_cancelled'
+      : 'shoe_received'
     try {
-      await pushMessage(
-        creds.adminGroupId,
-        [buildAdminStatusChangeFlex({
-          customerName: apt.customer_name,
-          serviceName,
-          date: apt.appointment_date,
-          time: String(apt.appointment_time).slice(0, 5),
-          oldStatus,
-          newStatus,
-          appointmentId: apt.id,
-        })],
-        creds.accessToken
-      )
-    } catch (err) {
-      console.error('[webhook] admin notify failed:', err)
-    }
-  }
-
-  // ✅ แจ้งลูกค้า เฉพาะ ยืนยันแล้ว / ยกเลิก
-  if (lineUserId && (newStatus === 'ยืนยันแล้ว' || newStatus === 'ยกเลิก')) {
-    const notifyType = newStatus === 'ยืนยันแล้ว' ? 'booking_confirmed' : 'booking_cancelled'
-    try {
-      const res = await fetch(notifyUrl, {
+      await fetch(notifyUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -106,6 +87,7 @@ export async function POST(req: Request) {
             time: String(apt.appointment_time).slice(0, 5),
             location: apt.location,
             shoeCount: apt.shoe_count,
+            receivedAt: record.updated_at,
             ...(newStatus === 'ยกเลิก' && record.cancel_reason ? { reason: record.cancel_reason } : {}),
           },
         }),
