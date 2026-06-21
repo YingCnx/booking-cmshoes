@@ -250,7 +250,7 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
               <p className="text-sm text-gray-500 mt-2 leading-relaxed">
                 ชื่อ: <span className="font-semibold text-gray-900">{name}</span><br />
                 เบอร์: <span className="font-semibold text-gray-900">{phone}</span><br />
-                วันที่: <span className="font-semibold text-gray-900">{dateLabel} {time} น.</span>
+                วันที่: <span className="font-semibold text-gray-900">{dateLabel} {time} น.</span><br />
                 จำนวน: <span className="font-semibold text-gray-900">{shoeCount} คู่</span>
               </p>
             </div>
