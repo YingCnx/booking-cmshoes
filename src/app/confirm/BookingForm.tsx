@@ -17,7 +17,7 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
   const [phone, setPhone]         = useState(defaults.phone)
   const [location, setLocation]   = useState(defaults.location)
   const [useOther, setUseOther]   = useState(!defaults.location)
-  const [shoeCount, setShoeCount] = useState('1')
+  const [shoeCount, setShoeCount] = useState('2')
   const [note, setNote]           = useState('')
   const [pending, startTransition] = useTransition()
   const [confirming, setConfirming] = useState(false)
@@ -202,7 +202,13 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
                 >
                   +
                 </button>
+                
               </div>
+              {parseInt(shoeCount) === 1 && (
+                  <p className="mt-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                    ⚠️ หากส่งรองเท้า 1 คู่ จะมีค่าบริการรับ-ส่ง 60 บาท
+                  </p>
+                )}
             </div>
 
           {/* หมายเหตุ */}
