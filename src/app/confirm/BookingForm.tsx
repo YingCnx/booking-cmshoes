@@ -176,6 +176,35 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
             )}
           </div>
 
+          {/* จำนวนรองเท้า */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                จำนวนรองเท้า <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={pending || parseInt(shoeCount) <= 1}
+                  onClick={() => setShoeCount(String(Math.max(1, parseInt(shoeCount) - 1)))}
+                  className="w-11 h-11 rounded-2xl border border-gray-200 bg-white text-xl font-bold text-gray-600 flex items-center justify-center active:scale-95 transition disabled:opacity-30"
+                >
+                  −
+                </button>
+                <div className="flex-1 text-center">
+                  <span className="text-2xl font-extrabold text-gray-900">{shoeCount}</span>
+                  <span className="text-sm text-gray-400 ml-1.5">คู่</span>
+                </div>
+                <button
+                  type="button"
+                  disabled={pending || parseInt(shoeCount) >= 10}
+                  onClick={() => setShoeCount(String(Math.min(10, parseInt(shoeCount) + 1)))}
+                  className="w-11 h-11 rounded-2xl border border-gray-200 bg-white text-xl font-bold text-gray-600 flex items-center justify-center active:scale-95 transition disabled:opacity-30"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
           {/* หมายเหตุ */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -222,6 +251,7 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
                 ชื่อ: <span className="font-semibold text-gray-900">{name}</span><br />
                 เบอร์: <span className="font-semibold text-gray-900">{phone}</span><br />
                 วันที่: <span className="font-semibold text-gray-900">{dateLabel} {time} น.</span>
+                จำนวน: <span className="font-semibold text-gray-900">{shoeCount} คู่</span>
               </p>
             </div>
             <div className="flex gap-2 px-5 pb-5">
