@@ -196,8 +196,8 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
                 </div>
                 <button
                   type="button"
-                  disabled={pending || parseInt(shoeCount) >= 10}
-                  onClick={() => setShoeCount(String(Math.min(10, parseInt(shoeCount) + 1)))}
+                  disabled={pending || parseInt(shoeCount) >= 20}
+                  onClick={() => setShoeCount(String(Math.min(20, parseInt(shoeCount) + 1)))}
                   className="w-11 h-11 rounded-2xl border border-gray-200 bg-white text-xl font-bold text-gray-600 flex items-center justify-center active:scale-95 transition disabled:opacity-30"
                 >
                   +
