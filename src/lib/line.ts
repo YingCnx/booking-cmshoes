@@ -636,7 +636,7 @@ export function buildDeliveryConfirmedFlex(data: {
           },
           {
             type: 'text',
-            text: 'บันทึกนัดหมายจัดส่งรองเท้าให้คุณแล้ว',
+            text: 'ทางร้านบันทึกนัดหมายจัดส่งรองเท้าให้คุณแล้ว',
             size: 'xs',
             color: '#4e4f52',
             margin: 'lg',
