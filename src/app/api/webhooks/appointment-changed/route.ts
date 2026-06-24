@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   const { data: apt } = await supabase
     .from('appointments')
     .select(`
-      id, appointment_date, appointment_time, location, shoe_count, branch_id,
+      id, appointment_type, appointment_date, appointment_time, location, shoe_count, branch_id,
       customer_name,
       customers ( line_user_id ),
       services ( service_name )
@@ -70,9 +70,19 @@ export async function POST(req: Request) {
 
   // ✅ แจ้งลูกค้า เฉพาะ ยืนยันแล้ว / ยกเลิก / สำเร็จ
   if (lineUserId && ['ยืนยันแล้ว', 'ยกเลิก', 'สำเร็จ'].includes(newStatus)) {
-    const notifyType = newStatus === 'ยืนยันแล้ว' ? 'booking_confirmed'
-      : newStatus === 'ยกเลิก' ? 'booking_cancelled'
-      : 'shoe_received'
+    
+    let notifyType
+
+      if (newStatus === 'ยืนยันแล้ว') {
+        notifyType =
+          apt.appointment_type === 'delivery'
+            ? 'booking_delivery_confirmed'
+            : 'booking_pickup_confirmed'
+      } else if (newStatus === 'ยกเลิก') {
+        notifyType = 'booking_cancelled'
+      } else {
+        notifyType = 'shoe_received'
+      }
     try {
       await fetch(notifyUrl, {
         method: 'POST',

@@ -448,6 +448,246 @@ export function buildBookingConfirmedFlex(data: {
   }
 }
 
+export function buildPickupConfirmedFlex(data: {
+  serviceName: string
+  date: string
+  time: string
+  location: string
+  shoeCount: number
+}) {
+  const dateLabel = new Date(data.date).toLocaleDateString('th-TH', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return {
+    type: 'flex',
+    altText: `ยืนยันนัดรับรองเท้า`,
+    contents: {
+      type: 'bubble',
+      size: 'kilo',
+      styles: {
+        header: { separator: true },
+        body: { backgroundColor: '#FFFFFF' },
+      },
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '0px',
+        contents: [
+          {
+            type: 'box',
+            layout: 'vertical',
+            height: '4px',
+            backgroundColor: '#059669',
+            contents: [],
+          },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: 'ร้านซักเกิบแอนด์สปา',
+            size: 'sm',
+            color: '#6B7280',
+          },
+          {
+            type: 'box',
+            layout: 'horizontal',
+            margin: 'sm',
+            alignItems: 'center',
+            contents: [
+              {
+                type: 'text',
+                text: '📦 ยืนยันนัดรับรองเท้าแล้ว',
+                size: 'md',
+                weight: 'bold',
+                color: '#111827',
+                flex: 1,
+                wrap: true,
+              },
+            ],
+          },
+          {
+            type: 'text',
+            text: 'ทางร้านยืนยันการเข้ารับรองเท้าของคุณแล้ว',
+            size: 'xs',
+            color: '#4e4f52',
+            margin: 'lg',
+            wrap: true,
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            height: '1px',
+            backgroundColor: '#E5E7EB',
+            margin: 'lg',
+            contents: [],
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            spacing: 'md',
+            contents: [
+              flexRow('บริการ', data.serviceName),
+              flexRow('วันที่', dateLabel),
+              flexRow('เวลา', `${data.time} น.`),
+              { type: 'separator', color: '#E5E7EB' },
+              flexRow('สถานที่รับ', data.location),
+              flexRow('จำนวน', `${data.shoeCount} คู่`),
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'xl',
+            paddingAll: '12px',
+            backgroundColor: '#F0FDF4',
+            cornerRadius: '10px',
+            contents: [
+              {
+                type: 'text',
+                text: 'เจ้าหน้าที่จะติดต่อคุณก่อนเข้ารับรองเท้าตามเวลานัดหมาย',
+                size: 'xs',
+                color: '#065F46',
+                align: 'center',
+                wrap: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+    
+  }
+}
+
+export function buildDeliveryConfirmedFlex(data: {
+  serviceName: string
+  date: string
+  time: string
+  location: string
+  shoeCount: number
+}) {
+  const dateLabel = new Date(data.date).toLocaleDateString('th-TH', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return {
+    type: 'flex',
+    altText: `ยืนยันนัดส่งรองเท้า`,
+    contents: {
+      type: 'bubble',
+      size: 'kilo',
+      styles: {
+        header: { separator: true },
+        body: { backgroundColor: '#FFFFFF' },
+      },
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '0px',
+        contents: [
+          {
+            type: 'box',
+            layout: 'vertical',
+            height: '4px',
+            backgroundColor: '#2563EB',
+            contents: [],
+          },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: 'ร้านซักเกิบแอนด์สปา',
+            size: 'sm',
+            color: '#6B7280',
+          },
+          {
+            type: 'box',
+            layout: 'horizontal',
+            margin: 'sm',
+            alignItems: 'center',
+            contents: [
+              {
+                type: 'text',
+                text: '👟 ยืนยันนัดส่งรองเท้าแล้ว',
+                size: 'md',
+                weight: 'bold',
+                color: '#111827',
+                flex: 1,
+                wrap: true,
+              },
+            ],
+          },
+          {
+            type: 'text',
+            text: 'ทางร้านยืนยันการจัดส่งรองเท้าคืนให้คุณแล้ว',
+            size: 'xs',
+            color: '#4e4f52',
+            margin: 'lg',
+            wrap: true,
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            height: '1px',
+            backgroundColor: '#E5E7EB',
+            margin: 'lg',
+            contents: [],
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            spacing: 'md',
+            contents: [
+              flexRow('บริการ', data.serviceName),
+              flexRow('วันที่', dateLabel),
+              flexRow('เวลา', `${data.time} น.`),
+              { type: 'separator', color: '#E5E7EB' },
+              flexRow('สถานที่ส่ง', data.location),
+              flexRow('จำนวน', `${data.shoeCount} คู่`),
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'xl',
+            paddingAll: '12px',
+            backgroundColor: '#EFF6FF',
+            cornerRadius: '10px',
+            contents: [
+              {
+                type: 'text',
+                text: 'กรุณาเตรียมรับรองเท้าตามวันและเวลาที่นัดหมาย',
+                size: 'xs',
+                color: '#1D4ED8',
+                align: 'center',
+                wrap: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+  }
+}
+
+
 // แจ้งลูกค้า — รับรองเท้าสำเร็จ
 export function buildShoeReceivedFlex(data: {
   serviceName: string

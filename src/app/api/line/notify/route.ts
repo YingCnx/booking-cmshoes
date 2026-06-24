@@ -7,6 +7,8 @@ import {
   buildBookingConfirmedFlex,
   buildBookingCancelledFlex,
   buildShoeReceivedFlex,
+  buildPickupConfirmedFlex,
+  buildDeliveryConfirmedFlex,
 } from '@/lib/line'
 
 export async function POST(req: Request) {
@@ -32,11 +34,23 @@ export async function POST(req: Request) {
     if (data.lineUserId) {
       await pushMessage(data.lineUserId, [buildBookingPendingFlex(data)], creds.accessToken)
     }
-  } else if (type === 'booking_confirmed') {
-    if (data.lineUserId) {
-      await pushMessage(data.lineUserId, [buildBookingConfirmedFlex(data)], creds.accessToken)
-    }
-  } else if (type === 'booking_cancelled') {
+  } else if (type === 'booking_pickup_confirmed') {
+  if (data.lineUserId) {
+    await pushMessage(
+      data.lineUserId,
+      [buildPickupConfirmedFlex(data)],
+      creds.accessToken
+    )
+  }
+} else if (type === 'booking_delivery_confirmed') {
+  if (data.lineUserId) {
+    await pushMessage(
+      data.lineUserId,
+      [buildDeliveryConfirmedFlex(data)],
+      creds.accessToken
+    )
+  }
+} else if (type === 'booking_cancelled') {
     if (data.lineUserId) {
       await pushMessage(data.lineUserId, [buildBookingCancelledFlex(data)], creds.accessToken)
     }
