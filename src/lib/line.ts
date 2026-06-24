@@ -568,6 +568,7 @@ export function buildPickupConfirmedFlex(data: {
   }
 }
 
+//นัดส่งรองเท้า
 export function buildDeliveryConfirmedFlex(data: {
   serviceName: string
   date: string
@@ -624,7 +625,7 @@ export function buildDeliveryConfirmedFlex(data: {
             contents: [
               {
                 type: 'text',
-                text: '👟 ยืนยันนัดส่งรองเท้าแล้ว',
+                text: 'นัดหมายจัดส่งรองเท้า',
                 size: 'md',
                 weight: 'bold',
                 color: '#111827',
@@ -635,7 +636,7 @@ export function buildDeliveryConfirmedFlex(data: {
           },
           {
             type: 'text',
-            text: 'ทางร้านยืนยันการจัดส่งรองเท้าคืนให้คุณแล้ว',
+            text: 'บันทึกนัดหมายจัดส่งรองเท้าให้คุณแล้ว',
             size: 'xs',
             color: '#4e4f52',
             margin: 'lg',
@@ -655,7 +656,8 @@ export function buildDeliveryConfirmedFlex(data: {
             margin: 'lg',
             spacing: 'md',
             contents: [
-              flexRow('บริการ', data.serviceName),
+             // flexRow('บริการ', data.serviceName),
+              flexRow('บริการ', "จัดส่งรองเท้า"),
               flexRow('วันที่', dateLabel),
               flexRow('เวลา', `${data.time} น.`),
               { type: 'separator', color: '#E5E7EB' },
