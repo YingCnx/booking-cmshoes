@@ -766,6 +766,12 @@ export function buildShoeReceivedFlex(data: {
 }
 
 //แจ้งลูกค้าจัดส่งรองเท้าสำเร็จ
+
+const nowTime = new Date().toLocaleTimeString('th-TH', {
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
 export function buildDeliveryCompletedFlex(data: {
   date: string
   time: string
@@ -808,7 +814,7 @@ export function buildDeliveryCompletedFlex(data: {
             contents: [
               flexRow('จำนวน', `${data.shoeCount} คู่`),
               flexRow('วันที่', dateLabel),
-              flexRow('เวลา', `${data.time} น.`),
+              flexRow('เวลา', `${nowTime} น.`)
             ],
           },
           {
