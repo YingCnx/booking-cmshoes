@@ -80,8 +80,11 @@ export async function POST(req: Request) {
             : 'booking_pickup_confirmed'
       } else if (newStatus === 'ยกเลิก') {
         notifyType = 'booking_cancelled'
-      } else {
-        notifyType = 'shoe_received'
+      } else if (newStatus === 'สำเร็จ') {
+        notifyType =
+          apt.appointment_type === 'pickup'
+            ? 'shoe_received'
+            : 'shoe_delivered'
       }
     try {
       await fetch(notifyUrl, {

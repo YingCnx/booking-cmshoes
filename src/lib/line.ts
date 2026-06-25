@@ -765,6 +765,84 @@ export function buildShoeReceivedFlex(data: {
   }
 }
 
+//แจ้งลูกค้าจัดส่งรองเท้าสำเร็จ
+export function buildDeliveryCompletedFlex(data: {
+  date: string
+  time: string
+  shoeCount: number
+}) {
+  const dateLabel = new Date(data.date).toLocaleDateString('th-TH', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
+  return {
+    type: 'flex',
+    altText: 'จัดส่งรองเท้าสำเร็จ',
+    contents: {
+      type: 'bubble',
+      size: 'kilo',
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: '🎉 จัดส่งรองเท้าสำเร็จ',
+            weight: 'bold',
+            size: 'lg',
+            wrap: true,
+          },
+          {
+            type: 'separator',
+            margin: 'lg',
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            spacing: 'md',
+            contents: [
+              flexRow('จำนวน', `${data.shoeCount} คู่`),
+              flexRow('วันที่', dateLabel),
+              flexRow('เวลา', `${data.time} น.`),
+            ],
+          },
+          {
+            type: 'text',
+            text: 'ทางร้านได้จัดส่งรองเท้าของคุณเรียบร้อยแล้ว',
+            size: 'sm',
+            color: '#666666',
+            margin: 'xl',
+            wrap: true,
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'xl',
+            paddingAll: '12px',
+            backgroundColor: '#F9FAFB',
+            cornerRadius: '10px',
+            contents: [
+              {
+                type: 'text',
+                text: 'ขอบคุณที่ไว้วางใจใช้บริการร้านซักเกิบแอนด์สปา 🙏',
+                align: 'center',
+                size: 'sm',
+                wrap: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+  }
+}
+
+
 // แจ้งลูกค้า — ยกเลิก
 export function buildBookingCancelledFlex(data: {
   serviceName: string
