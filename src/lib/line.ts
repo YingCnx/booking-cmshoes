@@ -768,8 +768,10 @@ export function buildShoeReceivedFlex(data: {
 //แจ้งลูกค้าจัดส่งรองเท้าสำเร็จ
 
 const nowTime = new Date().toLocaleTimeString('th-TH', {
+  timeZone: 'Asia/Bangkok',
   hour: '2-digit',
   minute: '2-digit',
+  hour12: false,
 })
 
 export function buildDeliveryCompletedFlex(data: {
