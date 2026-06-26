@@ -9,6 +9,14 @@ type LineCredentials = {
   liffId: string | null
 }
 
+
+const nowTime = new Date().toLocaleTimeString('th-TH', {
+  timeZone: 'Asia/Bangkok',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
 export async function getBranchLineCredentials(branchId: number): Promise<LineCredentials> {
   const { createClient } = await import('@/utils/supabase/server')
   const supabase = await createClient()
@@ -698,8 +706,10 @@ export function buildShoeReceivedFlex(data: {
   liffUrl: string
 }) {
   const receivedDate = new Date(data.receivedAt)
-  const dateLabel = receivedDate.toLocaleDateString('th-TH', {
-    weekday: 'long', day: 'numeric', month: 'long',
+  const dateLabel = receivedDate.toLocaleDateString('th-TH', {    
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   })
   const timeLabel = receivedDate.toLocaleTimeString('th-TH', {
     hour: '2-digit', minute: '2-digit',
@@ -734,7 +744,7 @@ export function buildShoeReceivedFlex(data: {
               },
             ],
           },
-          { type: 'text', text: `เมื่อ ${dateLabel} เวลา ${timeLabel} น.`, size: 'xs', color: '#4e4f52', margin: 'lg', wrap: true },
+          { type: 'text', text: `เมื่อ ${dateLabel} เวลา ${nowTime} น.`, size: 'xs', color: '#4e4f52', margin: 'lg', wrap: true },
           { type: 'box', layout: 'vertical', height: '1px', backgroundColor: '#E5E7EB', margin: 'lg', contents: [] },
           {
             type: 'box', layout: 'vertical', margin: 'lg', spacing: 'md',
@@ -766,14 +776,6 @@ export function buildShoeReceivedFlex(data: {
 }
 
 //แจ้งลูกค้าจัดส่งรองเท้าสำเร็จ
-
-const nowTime = new Date().toLocaleTimeString('th-TH', {
-  timeZone: 'Asia/Bangkok',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-})
-
 export function buildDeliveryCompletedFlex(data: {
   date: string
   time: string
