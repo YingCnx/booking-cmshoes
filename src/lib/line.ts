@@ -561,7 +561,7 @@ export function buildPickupConfirmedFlex(data: {
             contents: [
               {
                 type: 'text',
-                text: 'เจ้าหน้าที่จะติดต่อคุณก่อนเข้ารับรองเท้าตามเวลานัดหมาย',
+                text: 'ทางร้านจะติดต่อคุณก่อนเข้ารับรองเท้าตามเวลานัดหมาย',
                 size: 'xs',
                 color: '#065F46',
                 align: 'center',
