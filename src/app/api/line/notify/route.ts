@@ -10,6 +10,7 @@ import {
   buildDeliveryCompletedFlex,
   buildPickupConfirmedFlex,
   buildDeliveryConfirmedFlex,
+  buildRewardPointsEarnedFlex,
 } from '@/lib/line'
 
 export async function POST(req: Request) {
@@ -64,6 +65,10 @@ export async function POST(req: Request) {
     if (data.lineUserId) {
       const liffUrl = creds.liffId ? `https://liff.line.me/${creds.liffId}` : ''
       await pushMessage(data.lineUserId, [buildDeliveryCompletedFlex({ ...data, liffUrl })], creds.accessToken)
+    }
+  } else if (type === 'reward_points_earned') {
+    if (data.lineUserId) {
+      await pushMessage(data.lineUserId, [buildRewardPointsEarnedFlex(data)], creds.accessToken)
     }
   }
 

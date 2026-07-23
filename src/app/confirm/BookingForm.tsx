@@ -126,10 +126,10 @@ export function BookingForm({ time, date, dateLabel, branchName, hasLine, defaul
           {/* ชื่อ */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              ชื่อ-นามสกุล <span className="text-red-500">*</span>
+              ชื่อลูกค้า <span className="text-red-500">*</span>
             </label>
             <input type="text" value={name} onChange={e => setName(e.target.value)}
-              placeholder="กรอกชื่อ-นามสกุล" disabled={pending} className={inputCls} />
+              placeholder="กรอกชื่อ" disabled className={inputCls}  />
           </div>
 
           {/* เบอร์ */}

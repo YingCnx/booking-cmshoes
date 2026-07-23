@@ -922,3 +922,95 @@ export function buildBookingCancelledFlex(data: {
     },
   }
 }
+export function buildRewardPointsEarnedFlex(data: {
+  customerName?: string | null
+  customerCode?: string | null
+  points: number
+  balanceAfter: number
+  sourceLabel?: string | null
+  rewardsUrl?: string | null
+}) {
+  const points = Number(data.points || 0)
+  const balanceAfter = Number(data.balanceAfter || 0)
+  const rewardsUrl = data.rewardsUrl || `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/rewards`
+
+  return {
+    type: 'flex',
+    altText: `คุณได้รับคะแนนเพิ่ม ${points} คะแนน`,
+    contents: {
+      type: 'bubble',
+      size: 'kilo',
+      styles: {
+        header: { separator: true, backgroundColor: '#FFFFFF' },
+        body: { backgroundColor: '#FFFFFF' },
+        footer: { separator: true, backgroundColor: '#FFFFFF' },
+      },
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '0px',
+        contents: [
+          { type: 'box', layout: 'vertical', height: '4px', backgroundColor: '#06B6D4', contents: [] },
+          {
+            type: 'box',
+            layout: 'vertical',
+            paddingAll: '16px',
+            contents: [
+              { type: 'text', text: 'CM Shoes Care Rewards', size: 'sm', color: '#6B7280' },
+              { type: 'text', text: 'ได้รับคะแนนสะสมแล้ว', size: 'lg', weight: 'bold', color: '#111827', margin: 'sm', wrap: true },
+              ...(data.customerName ? [{ type: 'text', text: data.customerName, size: 'sm', color: '#374151', margin: 'xs', wrap: true }] : []),
+            ],
+          },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        spacing: 'md',
+        contents: [
+          {
+            type: 'box',
+            layout: 'vertical',
+            backgroundColor: '#ECFEFF',
+            cornerRadius: '16px',
+            paddingAll: '16px',
+            contents: [
+              { type: 'text', text: `+${points}`, size: '4xl', weight: 'bold', color: '#0891B2', align: 'center' },
+              { type: 'text', text: 'คะแนน', size: 'sm', color: '#0E7490', align: 'center', weight: 'bold' },
+            ],
+          },
+          { type: 'separator', color: '#E5E7EB' },
+          compactRow('ที่มา', data.sourceLabel || 'ระบบสะสมแต้ม'),
+          compactRow('แต้มคงเหลือ', `${balanceAfter.toLocaleString('th-TH')} คะแนน`),
+          ...(data.customerCode ? [compactRow('รหัสลูกค้า', data.customerCode)] : []),
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'md',
+            paddingAll: '12px',
+            backgroundColor: '#F9FAFB',
+            cornerRadius: '12px',
+            contents: [
+              { type: 'text', text: 'เช็คคะแนนสะสมและดูของรางวัลได้ที่ปุ่มด้านล่าง', size: 'xs', color: '#6B7280', align: 'center', wrap: true },
+            ],
+          },
+        ],
+      },
+      footer: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '12px',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#06B6D4',
+            height: 'sm',
+            action: { type: 'uri', label: 'เช็คคะแนนสะสม', uri: rewardsUrl },
+          },
+        ],
+      },
+    },
+  }
+}

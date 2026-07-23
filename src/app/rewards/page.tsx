@@ -2,8 +2,22 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { getLineSession } from '@/lib/line-session'
 import { redirect } from 'next/navigation'
-import { Gift, History, MessageCircle, Sparkles, Ticket } from 'lucide-react'
+import {
+  Award,
+  CheckCircle2,
+  Gift,
+  History,
+  LockKeyhole,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Ticket,
+  Trophy,
+  WalletCards,
+} from 'lucide-react'
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { LinkPhoneForm } from '../status/LinkPhoneForm'
 
 export const dynamic = 'force-dynamic'
@@ -70,14 +84,17 @@ export default async function RewardsPage() {
 
   if (!customer) {
     return (
-      <main className="min-h-screen bg-slate-50">
+      <main className="min-h-screen bg-[#F4F7FB]">
         <RewardsHeader />
         <section className="mx-auto max-w-lg px-4 py-6">
-          <div className="mb-5 rounded-3xl border border-amber-100 bg-white p-5 shadow-sm">
-            <div className="mb-2 text-sm font-semibold text-amber-700">ยังไม่พบบัญชีลูกค้า</div>
-            <h2 className="text-xl font-bold text-slate-950">ผูก LINE กับเบอร์โทรก่อนเช็คแต้ม</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              กรุณากรอกเบอร์โทรที่เคยใช้บริการกับร้าน เพื่อเชื่อมบัญชีและดูแต้มสะสมของคุณ
+          <div className="mb-5 rounded-[28px] border border-amber-200 bg-white p-5 shadow-sm">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+              <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
+              ยังไม่พบบัญชีลูกค้า
+            </div>
+            <h2 className="text-xl font-black text-slate-950">ผูก LINE กับเบอร์โทรก่อนเช็คแต้ม</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              กรุณากรอกเบอร์โทรที่เคยใช้บริการกับร้าน เพื่อเชื่อมบัญชีและดูแต้มสะสม ของรางวัล และประวัติแต้มของคุณ
             </p>
           </div>
           <LinkPhoneForm displayName={session.displayName} />
@@ -145,42 +162,91 @@ export default async function RewardsPage() {
   const currentPoints = ledgerBalance === null || ledgerBalance === undefined
     ? accountPoints
     : Number(ledgerBalance)
+  const lifetimeEarned = Number(account?.lifetime_earned_points ?? 0)
+  const lifetimeRedeemed = Number(account?.lifetime_redeemed_points ?? 0)
+  const nextReward = rewards.find((reward) => reward.points_cost > currentPoints)
+  const redeemableCount = rewards.filter((reward) => reward.points_cost <= currentPoints).length
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-10">
+    <main className="min-h-screen bg-[#F4F7FB] pb-10 text-slate-950">
       <RewardsHeader />
 
-      <div className="mx-auto max-w-lg space-y-4 px-4 py-5">
-        <section className="rounded-3xl bg-slate-950 p-5 text-white shadow-lg shadow-slate-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">แต้มของฉัน</div>
-              <h2 className="mt-2 text-lg font-bold">{customer.name}</h2>
-              {customer.customer_code && (
-                <div className="mt-0.5 font-mono text-xs text-slate-400">{customer.customer_code}</div>
-              )}
+      <div className="mx-auto max-w-lg space-y-5 px-4 py-5">
+        <section className="overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="bg-slate-950 px-5 py-5 text-white">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-bold text-cyan-100 ring-1 ring-cyan-200/20">
+                  <WalletCards className="h-3.5 w-3.5" aria-hidden="true" />
+                  แต้มสะสมของฉัน
+                </div>
+                <h2 className="mt-3 truncate text-xl font-black">{customer.name}</h2>
+                {customer.customer_code && (
+                  <div className="mt-1 font-mono text-xs text-slate-400">{customer.customer_code}</div>
+                )}
+              </div>
+              <div className="rounded-2xl bg-white/10 p-3">
+                <Sparkles className="h-6 w-6 text-cyan-200" aria-hidden="true" />
+              </div>
             </div>
-            <Sparkles className="h-7 w-7 text-cyan-200" aria-hidden="true" />
+
+            <div className="mt-7 flex items-end gap-2">
+              <span className="text-7xl font-black leading-none tracking-tight">{currentPoints.toLocaleString('th-TH')}</span>
+              <span className="pb-2 text-lg font-bold text-slate-300">แต้ม</span>
+            </div>
+
+            {nextReward ? (
+              <div className="mt-5 rounded-2xl bg-white/10 p-4">
+                <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-200">
+                  <span>อีก {Math.max(nextReward.points_cost - currentPoints, 0).toLocaleString('th-TH')} แต้ม แลก {nextReward.name_th}</span>
+                  <span>{Math.min(Math.round((currentPoints / nextReward.points_cost) * 100), 100)}%</span>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15">
+                  <div
+                    className="h-full rounded-full bg-cyan-300"
+                    style={{ width: `${Math.min((currentPoints / nextReward.points_cost) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            ) : rewards.length > 0 ? (
+              <div className="mt-5 rounded-2xl bg-emerald-400/15 p-4 text-sm font-bold text-emerald-100 ring-1 ring-emerald-200/20">
+                แต้มของคุณพร้อมแลกรางวัลได้หลายรายการแล้ว
+              </div>
+            ) : null}
           </div>
 
-          <div className="mt-6 flex items-end gap-2">
-            <span className="text-6xl font-black leading-none tracking-tight">{currentPoints}</span>
-            <span className="pb-2 text-lg font-bold text-slate-300">แต้ม</span>
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <Metric label="แต้มที่เคยได้รับ" value={account?.lifetime_earned_points ?? 0} />
-            <Metric label="แต้มที่เคยใช้" value={account?.lifetime_redeemed_points ?? 0} />
+          <div className="grid grid-cols-3 divide-x divide-slate-100 bg-white">
+            <Metric label="ได้ทั้งหมด" value={lifetimeEarned} />
+            <Metric label="ใช้ไปแล้ว" value={lifetimeRedeemed} />
+            <Metric label="แลกได้" value={redeemableCount} />
           </div>
         </section>
 
-        <section className="rounded-3xl border border-cyan-100 bg-cyan-50 p-4">
+        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-black text-slate-950">รับแต้มยังไง?</h2>
+              <p className="mt-1 text-sm text-slate-500">สะสมง่าย ใช้ได้จริงกับบริการของร้าน</p>
+            </div>
+            <div className="rounded-2xl bg-amber-50 p-3 text-amber-600">
+              <Trophy className="h-6 w-6" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <EarnRule icon={<CheckCircle2 className="h-5 w-5" />} title="รับรองเท้าสำเร็จ" value="1 คู่ = 1 แต้ม" text="เมื่อคิวถูกปิดงานและร้านยืนยันว่าสะสมแต้มได้" />
+            <EarnRule icon={<Star className="h-5 w-5" />} title="รีวิว Google Maps" value="+3 แต้ม" text="รับได้ 1 ครั้งต่อบัญชี หลังแอดมินตรวจสอบรีวิวแล้ว" />
+            <EarnRule icon={<ShieldCheck className="h-5 w-5" />} title="แลกรางวัลผ่านแอดมิน" value="หักตามจริง" text="ลูกค้าแจ้งในแชท LINE แอดมินเป็นผู้ทำรายการให้" />
+          </div>
+        </section>
+
+        <section className="rounded-[28px] border border-cyan-100 bg-cyan-50 p-5">
           <div className="flex gap-3">
             <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-cyan-700" aria-hidden="true" />
             <div>
-              <h3 className="font-bold text-slate-950">ต้องการแลกรางวัล?</h3>
+              <h3 className="font-black text-slate-950">ต้องการแลกรางวัล?</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                ลูกค้าสามารถดูแต้มและของรางวัลได้จากหน้านี้ หากต้องการแลกแต้ม กรุณาแจ้งแอดมินในแชท LINE
+                ลูกค้าดูแต้มและเลือกของรางวัลจากหน้านี้ได้ จากนั้นแจ้งแอดมินในแชท LINE เพื่อให้แอดมินกดแลกรางวัลและใช้สิทธิ์ให้
               </p>
             </div>
           </div>
@@ -188,34 +254,39 @@ export default async function RewardsPage() {
 
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-base font-bold text-slate-950">ของรางวัล</h2>
-            <span className="text-xs font-semibold text-slate-400">{rewards.length} รายการ</span>
+            <div>
+              <h2 className="text-lg font-black text-slate-950">ของรางวัล</h2>
+              <p className="text-sm text-slate-500">ดูว่าแต้มของคุณแลกอะไรได้บ้าง</p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-slate-200">{rewards.length} รายการ</span>
           </div>
 
           {rewards.length === 0 ? (
             <EmptyCard title="ยังไม่มีของรางวัลที่เปิดใช้งาน" text="รอติดตามของรางวัลใหม่จากทางร้านได้เลย" />
           ) : (
-            rewards.map((reward) => (
-              <RewardCard key={reward.id} reward={reward} currentPoints={currentPoints} />
-            ))
+            <div className="space-y-3">
+              {rewards.map((reward) => (
+                <RewardCard key={reward.id} reward={reward} currentPoints={currentPoints} />
+              ))}
+            </div>
           )}
         </section>
 
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-base font-bold text-slate-950">รางวัลที่เคยแลก</h2>
-            <span className="text-xs font-semibold text-slate-400">ล่าสุด 5 รายการ</span>
+            <h2 className="text-lg font-black text-slate-950">รางวัลของฉัน</h2>
+            <span className="text-xs font-bold text-slate-400">ล่าสุด 5 รายการ</span>
           </div>
 
           {redemptions.length === 0 ? (
             <EmptyCard title="ยังไม่มีรายการแลกรางวัล" text="เมื่อแอดมินแลกรางวัลให้ รายการจะแสดงตรงนี้" />
           ) : (
-            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
               {redemptions.map((redemption) => (
                 <div key={redemption.id} className="border-b border-slate-100 p-4 last:border-b-0">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="font-bold text-slate-950">
+                    <div className="min-w-0">
+                      <div className="truncate font-bold text-slate-950">
                         {redemption.reward_catalog?.name_th ?? 'ของรางวัล'}
                       </div>
                       <div className="mt-1 font-mono text-xs text-slate-400">{redemption.redemption_code}</div>
@@ -223,7 +294,7 @@ export default async function RewardsPage() {
                     <StatusBadge status={redemptionDisplayStatus(redemption)} />
                   </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                    <span>ใช้ {redemption.points_cost} แต้ม</span>
+                    <span>ใช้ {redemption.points_cost.toLocaleString('th-TH')} แต้ม</span>
                     <span>{formatDate(redemption.created_at)}</span>
                   </div>
                 </div>
@@ -234,24 +305,27 @@ export default async function RewardsPage() {
 
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-base font-bold text-slate-950">ประวัติแต้มล่าสุด</h2>
+            <div>
+              <h2 className="text-lg font-black text-slate-950">ประวัติแต้มล่าสุด</h2>
+              <p className="text-sm text-slate-500">ยอดคงเหลือหลังแต่ละรายการ</p>
+            </div>
             <History className="h-5 w-5 text-slate-400" aria-hidden="true" />
           </div>
 
           {transactions.length === 0 ? (
             <EmptyCard title="ยังไม่มีประวัติแต้ม" text="เมื่อได้รับหรือใช้แต้ม รายการจะแสดงตรงนี้" />
           ) : (
-            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
               {transactions.map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between gap-3 border-b border-slate-100 p-4 last:border-b-0">
-                  <div>
-                    <div className="text-sm font-bold text-slate-950">{sourceLabel(transaction.source_type)}</div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-bold text-slate-950">{sourceLabel(transaction.source_type)}</div>
                     <div className="mt-1 text-xs text-slate-400">{formatDateTime(transaction.created_at)}</div>
                     <div className="mt-1 text-xs font-semibold text-slate-500">คงเหลือ {Number(transaction.balance_after ?? 0).toLocaleString('th-TH')} แต้ม</div>
                   </div>
-                  <div className={`text-lg font-black ${transaction.points_delta > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  <div className={`shrink-0 rounded-2xl px-3 py-2 text-lg font-black ${transaction.points_delta > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
                     {transaction.points_delta > 0 ? '+' : ''}
-                    {transaction.points_delta}
+                    {transaction.points_delta.toLocaleString('th-TH')}
                   </div>
                 </div>
               ))}
@@ -261,7 +335,7 @@ export default async function RewardsPage() {
 
         <Link
           href="/status"
-          className="block rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-bold text-slate-900 shadow-sm active:scale-[0.99]"
+          className="block rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-black text-slate-900 shadow-sm active:scale-[0.99]"
         >
           เช็คสถานะรองเท้า
         </Link>
@@ -272,12 +346,11 @@ export default async function RewardsPage() {
 
 function RewardsHeader() {
   return (
-    <header className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-6 pb-9 pt-14 text-white">
-      <div className="absolute right-0 top-0 h-56 w-56 translate-x-1/3 -translate-y-1/3 rounded-full bg-cyan-500/30 blur-3xl" />
-      <div className="relative">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">CM Shoes Care</div>
+    <header className="bg-slate-950 px-6 pb-8 pt-14 text-white">
+      <div className="mx-auto max-w-lg">
+        <div className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">CM Shoes Care</div>
         <h1 className="text-3xl font-black tracking-tight">Rewards</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-300">เช็คแต้มสะสมและดูของรางวัลที่แลกได้</p>
+        <p className="mt-2 text-sm leading-6 text-slate-300">เช็คแต้มสะสม ดูวิธีรับแต้ม และเลือกของรางวัลที่อยากแลก</p>
       </div>
     </header>
   )
@@ -285,9 +358,26 @@ function RewardsHeader() {
 
 function Metric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl bg-white/10 px-4 py-3">
-      <div className="text-xs text-slate-300">{label}</div>
-      <div className="mt-1 text-2xl font-black">{value}</div>
+    <div className="px-4 py-4 text-center">
+      <div className="text-xs font-semibold text-slate-500">{label}</div>
+      <div className="mt-1 text-2xl font-black text-slate-950">{Number(value || 0).toLocaleString('th-TH')}</div>
+    </div>
+  )
+}
+
+function EarnRule({ icon, title, value, text }: { icon: ReactNode; title: string; value: string; text: string }) {
+  return (
+    <div className="flex gap-3 rounded-2xl bg-slate-50 p-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-cyan-700 ring-1 ring-slate-200">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-bold text-slate-950">{title}</h3>
+          <span className="shrink-0 rounded-full bg-cyan-100 px-3 py-1 text-xs font-black text-cyan-800">{value}</span>
+        </div>
+        <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
+      </div>
     </div>
   )
 }
@@ -295,41 +385,60 @@ function Metric({ label, value }: { label: string; value: number }) {
 function RewardCard({ reward, currentPoints }: { reward: RewardCatalogRow; currentPoints: number }) {
   const canRedeem = currentPoints >= reward.points_cost
   const remaining = Math.max(reward.points_cost - currentPoints, 0)
+  const progress = reward.points_cost > 0 ? Math.min((currentPoints / reward.points_cost) * 100, 100) : 100
 
   return (
-    <article className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Ticket className="h-5 w-5 shrink-0 text-cyan-700" aria-hidden="true" />
-            <h3 className="font-bold text-slate-950">{reward.name_th}</h3>
+    <article className={`overflow-hidden rounded-[24px] border bg-white shadow-sm ${canRedeem ? 'border-emerald-200' : 'border-slate-200'}`}>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${canRedeem ? 'bg-emerald-50 text-emerald-700' : 'bg-cyan-50 text-cyan-700'}`}>
+                <Ticket className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="truncate font-black text-slate-950">{reward.name_th}</h3>
+                <div className="mt-0.5 text-xs font-bold text-slate-400">{rewardTypeLabel(reward.metadata.reward_type)}</div>
+              </div>
+            </div>
+            {reward.description && (
+              <p className="mt-3 text-sm leading-6 text-slate-600">{reward.description}</p>
+            )}
           </div>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">{reward.description}</p>
+          <div className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${canRedeem ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+            {canRedeem ? 'แลกได้' : `ขาด ${remaining.toLocaleString('th-TH')}`}
+          </div>
         </div>
-        <div className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${canRedeem ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-          {canRedeem ? 'แลกได้' : `ขาด ${remaining}`}
+
+        <div className="mt-4 rounded-2xl bg-slate-50 p-3">
+          <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-500">
+            <span>{currentPoints.toLocaleString('th-TH')} / {reward.points_cost.toLocaleString('th-TH')} แต้ม</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className={`h-full rounded-full ${canRedeem ? 'bg-emerald-500' : 'bg-cyan-500'}`} style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Chip strong>{reward.points_cost.toLocaleString('th-TH')} แต้ม</Chip>
+          {reward.metadata.valid_days ? <Chip>อายุ {reward.metadata.valid_days} วัน</Chip> : null}
+          {reward.metadata.max_value ? <Chip>สูงสุด {reward.metadata.max_value} บาท</Chip> : null}
+          {reward.metadata.discount_amount ? <Chip>ลด {reward.metadata.discount_amount} บาท</Chip> : null}
+          {reward.metadata.quantity ? <Chip>{reward.metadata.quantity} ชิ้น</Chip> : null}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Chip>{reward.points_cost} แต้ม</Chip>
-        {reward.metadata.valid_days ? <Chip>อายุ {reward.metadata.valid_days} วัน</Chip> : null}
-        {reward.metadata.max_value ? <Chip>สูงสุด {reward.metadata.max_value} บาท</Chip> : null}
-        {reward.metadata.discount_amount ? <Chip>ลด {reward.metadata.discount_amount} บาท</Chip> : null}
-        {reward.metadata.quantity ? <Chip>จำนวน {reward.metadata.quantity} ชิ้น</Chip> : null}
-      </div>
-
-      <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500">
-        <div className="font-semibold text-slate-700">{rewardTypeLabel(reward.metadata.reward_type)}</div>
-        <div>หากต้องการแลก กรุณาแจ้งแอดมินในแชท LINE</div>
+      <div className={`border-t px-4 py-3 text-xs leading-6 ${canRedeem ? 'border-emerald-100 bg-emerald-50 text-emerald-800' : 'border-slate-100 bg-white text-slate-500'}`}>
+        {canRedeem ? 'แต้มถึงแล้ว แจ้งแอดมินในแชท LINE เพื่อแลกรางวัลได้เลย' : 'สะสมเพิ่มอีกนิด แล้วกลับมาแลกรางวัลนี้ได้'}
       </div>
     </article>
   )
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
+function Chip({ children, strong = false }: { children: ReactNode; strong?: boolean }) {
   return (
-    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+    <span className={`rounded-full px-3 py-1 text-xs font-bold ${strong ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-600'}`}>
       {children}
     </span>
   )
@@ -337,10 +446,10 @@ function Chip({ children }: { children: React.ReactNode }) {
 
 function EmptyCard({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-6 text-center">
+    <div className="rounded-[24px] border border-dashed border-slate-200 bg-white p-6 text-center">
       <Gift className="mx-auto h-8 w-8 text-slate-300" aria-hidden="true" />
-      <h3 className="mt-3 font-bold text-slate-900">{title}</h3>
-      <p className="mt-1 text-sm text-slate-500">{text}</p>
+      <h3 className="mt-3 font-black text-slate-900">{title}</h3>
+      <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
     </div>
   )
 }
@@ -351,10 +460,12 @@ function StatusBadge({ status }: { status: string }) {
     ? 'bg-slate-100 text-slate-600'
     : status === 'cancelled' || status === 'refunded'
       ? 'bg-rose-50 text-rose-700'
-      : 'bg-emerald-50 text-emerald-700'
+      : status === 'expired'
+        ? 'bg-amber-50 text-amber-700'
+        : 'bg-emerald-50 text-emerald-700'
 
   return (
-    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${className}`}>
+    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${className}`}>
       {label}
     </span>
   )
