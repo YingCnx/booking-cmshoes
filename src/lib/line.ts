@@ -933,11 +933,16 @@ export function buildRewardPointsEarnedFlex(data: {
   const points = Number(data.points || 0)
   const balanceAfter = Number(data.balanceAfter || 0)
   const rewardsUrl = data.rewardsUrl || `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/rewards`
-  const googleReviewUrl = 'https://g.page/r/CUaWHRM3krtXEBM/review'
+  const sourceLabel = data.sourceLabel || 'ระบบสะสมแต้ม'
+  const headline = sourceLabel.includes('Facebook')
+    ? 'ได้รับแต้มรีวิว Facebook แล้ว'
+    : sourceLabel.includes('Google')
+      ? 'ได้รับแต้มรีวิว Google แล้ว'
+      : 'ได้รับคะแนนสะสมแล้ว'
 
   return {
     type: 'flex',
-    altText: `คุณได้รับคะแนนเพิ่ม ${points} คะแนน`,
+    altText: `${headline} +${points} คะแนน`,
     contents: {
       type: 'bubble',
       size: 'kilo',
@@ -958,7 +963,7 @@ export function buildRewardPointsEarnedFlex(data: {
             paddingAll: '16px',
             contents: [
               { type: 'text', text: 'CM Shoes Care Rewards', size: 'sm', color: '#6B7280' },
-              { type: 'text', text: 'ได้รับคะแนนสะสมแล้ว', size: 'lg', weight: 'bold', color: '#111827', margin: 'sm', wrap: true },
+              { type: 'text', text: headline, size: 'lg', weight: 'bold', color: '#111827', margin: 'sm', wrap: true },
               ...(data.customerName ? [{ type: 'text', text: data.customerName, size: 'sm', color: '#374151', margin: 'xs', wrap: true }] : []),
             ],
           },
@@ -982,7 +987,7 @@ export function buildRewardPointsEarnedFlex(data: {
             ],
           },
           { type: 'separator', color: '#E5E7EB' },
-          compactRow('ที่มา', data.sourceLabel || 'ระบบสะสมแต้ม'),
+          compactRow('ที่มา', sourceLabel),
           compactRow('แต้มคงเหลือ', `${balanceAfter.toLocaleString('th-TH')} คะแนน`),
           ...(data.customerCode ? [compactRow('รหัสลูกค้า', data.customerCode)] : []),
           {
@@ -1002,7 +1007,6 @@ export function buildRewardPointsEarnedFlex(data: {
         type: 'box',
         layout: 'vertical',
         paddingAll: '12px',
-        spacing: 'sm',
         contents: [
           {
             type: 'button',
@@ -1010,12 +1014,6 @@ export function buildRewardPointsEarnedFlex(data: {
             color: '#06B6D4',
             height: 'sm',
             action: { type: 'uri', label: 'เช็คคะแนนสะสม', uri: rewardsUrl },
-          },
-          {
-            type: 'button',
-            style: 'secondary',
-            height: 'sm',
-            action: { type: 'uri', label: 'รีวิว Google +3 แต้ม', uri: googleReviewUrl },
           },
         ],
       },
