@@ -6,19 +6,32 @@ export async function POST(req: Request) {
   const { lineUserId, displayName, pictureUrl, liffId } = await req.json()
 
   if (!lineUserId || !liffId) {
-    return NextResponse.json({ message: 'lineUserId และ liffId required' }, { status: 400 })
+    return NextResponse.json({ message: 'lineUserId and liffId required' }, { status: 400 })
   }
 
-  // หา branch จาก liffId
+  const defaultLiffId = process.env.NEXT_PUBLIC_DEFAULT_LIFF_ID ?? ''
+  const rewardsLiffId = process.env.NEXT_PUBLIC_REWARDS_LIFF_ID ?? ''
+  const branchLookupLiffId = liffId === rewardsLiffId && defaultLiffId ? defaultLiffId : liffId
+
   const supabase = await createClient()
-  const { data: branch } = await supabase
+  let { data: branch } = await supabase
     .from('branches')
     .select('id')
-    .eq('line_liff_id', liffId)
+    .eq('line_liff_id', branchLookupLiffId)
     .maybeSingle()
 
+  if (!branch && branchLookupLiffId !== defaultLiffId && defaultLiffId) {
+    const fallback = await supabase
+      .from('branches')
+      .select('id')
+      .eq('line_liff_id', defaultLiffId)
+      .maybeSingle()
+
+    branch = fallback.data
+  }
+
   if (!branch) {
-    return NextResponse.json({ message: 'ไม่พบสาขาที่ตรงกับ LIFF นี้' }, { status: 404 })
+    return NextResponse.json({ message: 'Branch not found for this LIFF app' }, { status: 404 })
   }
 
   const sessionData = {
