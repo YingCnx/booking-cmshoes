@@ -933,6 +933,7 @@ export function buildRewardPointsEarnedFlex(data: {
   const points = Number(data.points || 0)
   const balanceAfter = Number(data.balanceAfter || 0)
   const rewardsUrl = data.rewardsUrl || `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/rewards`
+  const googleReviewUrl = 'https://g.page/r/CUaWHRM3krtXEBM/review'
 
   return {
     type: 'flex',
@@ -1001,6 +1002,7 @@ export function buildRewardPointsEarnedFlex(data: {
         type: 'box',
         layout: 'vertical',
         paddingAll: '12px',
+        spacing: 'sm',
         contents: [
           {
             type: 'button',
@@ -1008,6 +1010,12 @@ export function buildRewardPointsEarnedFlex(data: {
             color: '#06B6D4',
             height: 'sm',
             action: { type: 'uri', label: 'เช็คคะแนนสะสม', uri: rewardsUrl },
+          },
+          {
+            type: 'button',
+            style: 'secondary',
+            height: 'sm',
+            action: { type: 'uri', label: 'รีวิว Google +3 แต้ม', uri: googleReviewUrl },
           },
         ],
       },

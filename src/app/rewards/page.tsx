@@ -15,12 +15,15 @@ import {
   Ticket,
   Trophy,
   WalletCards,
+  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { LinkPhoneForm } from '../status/LinkPhoneForm'
 
 export const dynamic = 'force-dynamic'
+
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CUaWHRM3krtXEBM/review'
 
 type RewardMetadata = {
   reward_type?: string
@@ -235,7 +238,14 @@ export default async function RewardsPage() {
 
           <div className="space-y-3">
             <EarnRule icon={<CheckCircle2 className="h-5 w-5" />} title="รับรองเท้าสำเร็จ" value="1 คู่ = 1 แต้ม" text="เมื่อคิวถูกปิดงานและร้านยืนยันว่าสะสมแต้มได้" />
-            <EarnRule icon={<Star className="h-5 w-5" />} title="รีวิว Google Maps" value="+3 แต้ม" text="รับได้ 1 ครั้งต่อบัญชี หลังแอดมินตรวจสอบรีวิวแล้ว" />
+            <EarnRule
+              icon={<Star className="h-5 w-5" />}
+              title="รีวิว Google Maps"
+              value="+3 แต้ม"
+              text="รับได้ 1 ครั้งต่อบัญชี หลังรีวิวแล้วแจ้งแอดมินใน LINE เพื่อยืนยันแต้ม"
+              actionHref={GOOGLE_REVIEW_URL}
+              actionLabel="รีวิวร้านบน Google"
+            />
             <EarnRule icon={<ShieldCheck className="h-5 w-5" />} title="แลกรางวัลผ่านแอดมิน" value="หักตามจริง" text="ลูกค้าแจ้งในแชท LINE แอดมินเป็นผู้ทำรายการให้" />
           </div>
         </section>
@@ -365,7 +375,21 @@ function Metric({ label, value }: { label: string; value: number }) {
   )
 }
 
-function EarnRule({ icon, title, value, text }: { icon: ReactNode; title: string; value: string; text: string }) {
+function EarnRule({
+  icon,
+  title,
+  value,
+  text,
+  actionHref,
+  actionLabel,
+}: {
+  icon: ReactNode
+  title: string
+  value: string
+  text: string
+  actionHref?: string
+  actionLabel?: string
+}) {
   return (
     <div className="flex gap-3 rounded-2xl bg-slate-50 p-3">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-cyan-700 ring-1 ring-slate-200">
@@ -377,6 +401,17 @@ function EarnRule({ icon, title, value, text }: { icon: ReactNode; title: string
           <span className="shrink-0 rounded-full bg-cyan-100 px-3 py-1 text-xs font-black text-cyan-800">{value}</span>
         </div>
         <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
+        {actionHref && actionLabel ? (
+          <a
+            href={actionHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-black text-cyan-700 ring-1 ring-cyan-100 active:scale-[0.99]"
+          >
+            {actionLabel}
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
+        ) : null}
       </div>
     </div>
   )
