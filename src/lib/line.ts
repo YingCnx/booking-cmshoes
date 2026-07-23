@@ -962,7 +962,7 @@ export function buildRewardPointsEarnedFlex(data: {
             layout: 'vertical',
             paddingAll: '16px',
             contents: [
-              { type: 'text', text: 'CM Shoes Care Rewards', size: 'sm', color: '#6B7280' },
+              { type: 'text', text: 'ร้านซักเกิบแอนด์สปา', size: 'sm', color: '#6B7280' },
               { type: 'text', text: headline, size: 'lg', weight: 'bold', color: '#111827', margin: 'sm', wrap: true },
               ...(data.customerName ? [{ type: 'text', text: data.customerName, size: 'sm', color: '#374151', margin: 'xs', wrap: true }] : []),
             ],

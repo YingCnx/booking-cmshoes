@@ -358,8 +358,8 @@ function RewardsHeader() {
   return (
     <header className="bg-slate-950 px-6 pb-8 pt-14 text-white">
       <div className="mx-auto max-w-lg">
-        <div className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">CM Shoes Care</div>
-        <h1 className="text-3xl font-black tracking-tight">Rewards</h1>
+        <div className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">ร้านซักเกิบแอนด์สปา</div>
+        <h1 className="text-3xl font-black tracking-tight">สะสมแต้ม</h1>
         <p className="mt-2 text-sm leading-6 text-slate-300">เช็คแต้มสะสม ดูวิธีรับแต้ม และเลือกของรางวัลที่อยากแลก</p>
       </div>
     </header>
