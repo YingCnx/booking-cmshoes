@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { getLineSession } from '@/lib/line-session'
 import { redirect } from 'next/navigation'
 import { Gift, History, MessageCircle, Sparkles, Ticket } from 'lucide-react'
@@ -59,6 +60,7 @@ export default async function RewardsPage() {
   if (!session) redirect('/liff?next=/rewards')
 
   const supabase = await createClient()
+  const rewardsDb = createAdminClient()
 
   const { data: customer } = await supabase
     .from('customers')
@@ -91,12 +93,12 @@ export default async function RewardsPage() {
     ledgerResult,
     redemptionResult,
   ] = await Promise.all([
-    supabase
+    rewardsDb
       .from('reward_accounts')
       .select('id, current_points, lifetime_earned_points, lifetime_redeemed_points')
       .eq('customer_id', customer.id)
       .maybeSingle(),
-    supabase
+    rewardsDb
       .from('reward_point_ledger')
       .select('id, balance_after, created_at')
       .eq('customer_id', customer.id)
@@ -104,19 +106,19 @@ export default async function RewardsPage() {
       .order('id', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase
+    rewardsDb
       .from('reward_catalog')
       .select('id, code, name_th, description, points_cost, metadata')
       .eq('is_active', true)
       .order('points_cost', { ascending: true }),
-    supabase
+    rewardsDb
       .from('reward_point_ledger')
       .select('id, points_delta, balance_after, source_type, note, created_at, metadata')
       .eq('customer_id', customer.id)
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
       .limit(8),
-    supabase
+    rewardsDb
       .from('reward_redemptions')
       .select(`
         id,
