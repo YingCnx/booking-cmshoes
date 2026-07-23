@@ -31,6 +31,7 @@ type RewardCatalogRow = {
 type LedgerRow = {
   id: number
   points_delta: number
+  balance_after: number
   source_type: string
   note: string | null
   created_at: string
@@ -45,6 +46,9 @@ type RedemptionRow = {
   created_at: string
   used_at: string | null
   cancelled_at: string | null
+  metadata: {
+    expires_at?: string
+  } | null
   reward_catalog: {
     name_th: string
   } | null
@@ -82,6 +86,7 @@ export default async function RewardsPage() {
 
   const [
     accountResult,
+    latestLedgerResult,
     rewardsResult,
     ledgerResult,
     redemptionResult,
@@ -92,15 +97,24 @@ export default async function RewardsPage() {
       .eq('customer_id', customer.id)
       .maybeSingle(),
     supabase
+      .from('reward_point_ledger')
+      .select('id, balance_after, created_at')
+      .eq('customer_id', customer.id)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
       .from('reward_catalog')
       .select('id, code, name_th, description, points_cost, metadata')
       .eq('is_active', true)
       .order('points_cost', { ascending: true }),
     supabase
       .from('reward_point_ledger')
-      .select('id, points_delta, source_type, note, created_at, metadata')
+      .select('id, points_delta, balance_after, source_type, note, created_at, metadata')
       .eq('customer_id', customer.id)
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(8),
     supabase
       .from('reward_redemptions')
@@ -112,6 +126,7 @@ export default async function RewardsPage() {
         created_at,
         used_at,
         cancelled_at,
+        metadata,
         reward_catalog:reward_catalog_id ( name_th )
       `)
       .eq('customer_id', customer.id)
@@ -123,7 +138,11 @@ export default async function RewardsPage() {
   const rewards = (rewardsResult.data ?? []) as RewardCatalogRow[]
   const transactions = (ledgerResult.data ?? []) as LedgerRow[]
   const redemptions = (redemptionResult.data ?? []) as unknown as RedemptionRow[]
-  const currentPoints = account?.current_points ?? 0
+  const accountPoints = Number(account?.current_points ?? 0)
+  const ledgerBalance = latestLedgerResult.data?.balance_after
+  const currentPoints = ledgerBalance === null || ledgerBalance === undefined
+    ? accountPoints
+    : Number(ledgerBalance)
 
   return (
     <main className="min-h-screen bg-slate-50 pb-10">
@@ -199,7 +218,7 @@ export default async function RewardsPage() {
                       </div>
                       <div className="mt-1 font-mono text-xs text-slate-400">{redemption.redemption_code}</div>
                     </div>
-                    <StatusBadge status={redemption.status} />
+                    <StatusBadge status={redemptionDisplayStatus(redemption)} />
                   </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
                     <span>ใช้ {redemption.points_cost} แต้ม</span>
@@ -226,6 +245,7 @@ export default async function RewardsPage() {
                   <div>
                     <div className="text-sm font-bold text-slate-950">{sourceLabel(transaction.source_type)}</div>
                     <div className="mt-1 text-xs text-slate-400">{formatDateTime(transaction.created_at)}</div>
+                    <div className="mt-1 text-xs font-semibold text-slate-500">คงเหลือ {Number(transaction.balance_after ?? 0).toLocaleString('th-TH')} แต้ม</div>
                   </div>
                   <div className={`text-lg font-black ${transaction.points_delta > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {transaction.points_delta > 0 ? '+' : ''}
@@ -371,6 +391,13 @@ function redemptionStatusLabel(status: string) {
   }
 
   return labels[status] ?? status
+}
+
+function redemptionDisplayStatus(redemption: RedemptionRow) {
+  if (redemption.status !== 'requested') return redemption.status
+  const expiresAt = redemption.metadata?.expires_at ? new Date(redemption.metadata.expires_at) : null
+  if (expiresAt && expiresAt.getTime() < Date.now()) return 'expired'
+  return 'ready_to_use'
 }
 
 function formatDate(value: string) {
