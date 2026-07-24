@@ -189,7 +189,6 @@ export default async function RewardsPage() {
               <Gift className="h-4 w-4" aria-hidden="true" />
               คะแนนสะสมของคุณ
             </div>
-            <h1 className="max-w-xl text-5xl font-black leading-tight text-teal-950 md:text-7xl">เช็คแต้ม</h1>
             <p className="mt-4 max-w-xl text-lg font-semibold leading-8 text-slate-700">
               สะสมง่าย แลกของรางวัลได้หลายแบบ ใช้คู่กับบัญชี LINE ของคุณ
             </p>
@@ -528,6 +527,14 @@ function redemptionDisplayStatus(redemption: RedemptionRow) {
 
 function rewardImage(reward: RewardCatalogRow, index: number) {
   if (reward.metadata.image_url) return reward.metadata.image_url
+
+  const imagesByCode: Record<string, string> = {
+    DISCOUNT_50_BAHT: '/rewards/discount-50-baht.jpg',
+    FREE_SNEAKER_CLEANING_1_PAIR: '/rewards/free-sneaker-cleaning.jpg',
+    SHOE_BAG: '/rewards/shoe-bag.jpg',
+  }
+
+  if (imagesByCode[reward.code]) return imagesByCode[reward.code]
 
   const images = ['/oncloud-after.jpg', '/after.jpg', '/birken-after.jpg', '/speedcat-after.jpg']
   return images[index % images.length]
