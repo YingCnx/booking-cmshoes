@@ -3,19 +3,22 @@ import { createAdminClient } from '@/utils/supabase/admin'
 import { getLineSession } from '@/lib/line-session'
 import { redirect } from 'next/navigation'
 import {
-  Award,
   CheckCircle2,
+  Clock3,
+  ExternalLink,
   Gift,
   History,
+  Home,
   LockKeyhole,
   MessageCircle,
+  Phone,
   ShieldCheck,
+  ShoppingBag,
+  Smartphone,
   Sparkles,
   Star,
   Ticket,
-  Trophy,
   WalletCards,
-  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -87,15 +90,15 @@ export default async function RewardsPage() {
 
   if (!customer) {
     return (
-      <main className="min-h-screen bg-[#F4F7FB]">
-        <RewardsHeader />
-        <section className="mx-auto max-w-lg px-4 py-6">
-          <div className="mb-5 rounded-[28px] border border-amber-200 bg-white p-5 shadow-sm">
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+      <main className="min-h-screen bg-[#F1FAFA] text-slate-950">
+        <RewardsHeader sessionName={session.displayName} compact />
+        <section className="mx-auto max-w-lg px-4 py-8">
+          <div className="mb-5 rounded-[28px] border border-amber-200 bg-white p-6 shadow-sm">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
               <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
               ยังไม่พบบัญชีลูกค้า
             </div>
-            <h2 className="text-xl font-black text-slate-950">ผูก LINE กับเบอร์โทรก่อนเช็คแต้ม</h2>
+            <h2 className="text-2xl font-black text-slate-950">ผูก LINE กับเบอร์โทรก่อนเช็คแต้ม</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               กรุณากรอกเบอร์โทรที่เคยใช้บริการกับร้าน เพื่อเชื่อมบัญชีและดูแต้มสะสม ของรางวัล และประวัติแต้มของคุณ
             </p>
@@ -137,7 +140,7 @@ export default async function RewardsPage() {
       .eq('customer_id', customer.id)
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
-      .limit(8),
+      .limit(6),
     rewardsDb
       .from('reward_redemptions')
       .select(`
@@ -162,327 +165,311 @@ export default async function RewardsPage() {
   const redemptions = (redemptionResult.data ?? []) as unknown as RedemptionRow[]
   const accountPoints = Number(account?.current_points ?? 0)
   const ledgerBalance = latestLedgerResult.data?.balance_after
-  const currentPoints = ledgerBalance === null || ledgerBalance === undefined
-    ? accountPoints
-    : Number(ledgerBalance)
+  const currentPoints = ledgerBalance === null || ledgerBalance === undefined ? accountPoints : Number(ledgerBalance)
   const lifetimeEarned = Number(account?.lifetime_earned_points ?? 0)
   const lifetimeRedeemed = Number(account?.lifetime_redeemed_points ?? 0)
   const nextReward = rewards.find((reward) => reward.points_cost > currentPoints)
   const redeemableCount = rewards.filter((reward) => reward.points_cost <= currentPoints).length
+  const featuredRewards = rewards.slice(0, 4)
 
   return (
-    <main className="min-h-screen bg-[#F4F7FB] pb-10 text-slate-950">
-      <RewardsHeader />
+    <main className="min-h-screen bg-[#F7FBFB] text-slate-950">
+      <RewardsHeader sessionName={customer.name} />
 
-      <div className="mx-auto max-w-lg space-y-5 px-4 py-5">
-        <section className="overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="bg-slate-950 px-5 py-5 text-white">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-bold text-cyan-100 ring-1 ring-cyan-200/20">
-                  <WalletCards className="h-3.5 w-3.5" aria-hidden="true" />
-                  แต้มสะสมของฉัน
-                </div>
-                <h2 className="mt-3 truncate text-xl font-black">{customer.name}</h2>
-                {customer.customer_code && (
-                  <div className="mt-1 font-mono text-xs text-slate-400">{customer.customer_code}</div>
-                )}
-              </div>
-              <div className="rounded-2xl bg-white/10 p-3">
-                <Sparkles className="h-6 w-6 text-cyan-200" aria-hidden="true" />
-              </div>
+      <section className="relative overflow-hidden border-b border-cyan-100 bg-gradient-to-br from-[#E9FBFA] via-white to-[#D5F3F1]">
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 opacity-80 md:block">
+          <img src="/oncloud-after.jpg" alt="" className="h-full w-full object-cover object-center" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#E9FBFA] via-white/70 to-white/10" />
+        </div>
+
+        <div className="relative mx-auto grid max-w-6xl gap-8 px-5 py-10 md:grid-cols-[1fr_360px] md:px-8 md:py-16">
+          <div className="flex flex-col justify-center">
+            <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-teal-800 shadow-sm ring-1 ring-teal-100">
+              <Gift className="h-4 w-4" aria-hidden="true" />
+              คะแนนสะสมของคุณ
             </div>
+            <h1 className="max-w-xl text-5xl font-black leading-tight text-teal-950 md:text-7xl">เช็คแต้ม</h1>
+            <p className="mt-4 max-w-xl text-lg font-semibold leading-8 text-slate-700">
+              สะสมง่าย แลกของรางวัลได้หลายแบบ ใช้คู่กับบัญชี LINE ของคุณ
+            </p>
 
-            <div className="mt-7 flex items-end gap-2">
-              <span className="text-7xl font-black leading-none tracking-tight">{currentPoints.toLocaleString('th-TH')}</span>
-              <span className="pb-2 text-lg font-bold text-slate-300">แต้ม</span>
+            <div className="mt-7 grid max-w-xl gap-3 rounded-[22px] bg-white/80 p-4 shadow-sm ring-1 ring-cyan-100 sm:grid-cols-2">
+              <MiniRule icon={<ShoppingBag className="h-7 w-7" />} title="1 คู่ = 1 แต้ม" text="ทุกการใช้บริการที่ร้านยืนยัน" />
+              <MiniRule icon={<Smartphone className="h-7 w-7" />} title="ผูกบัญชี LINE" text="สะสมอัตโนมัติทุกครั้ง" />
+            </div>
+          </div>
+
+          <div className="rounded-[28px] bg-white/95 p-6 shadow-xl shadow-cyan-900/10 ring-1 ring-cyan-100 backdrop-blur">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-sm font-black text-teal-900">คะแนนของคุณ</div>
+                <div className="mt-2 flex items-end gap-2">
+                  <span className="text-7xl font-black leading-none text-teal-700">{currentPoints.toLocaleString('th-TH')}</span>
+                  <span className="pb-2 text-lg font-black text-teal-900">แต้ม</span>
+                </div>
+              </div>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-100 text-4xl font-black text-teal-600 ring-8 ring-teal-50">
+                P
+              </div>
             </div>
 
             {nextReward ? (
-              <div className="mt-5 rounded-2xl bg-white/10 p-4">
-                <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-200">
-                  <span>อีก {Math.max(nextReward.points_cost - currentPoints, 0).toLocaleString('th-TH')} แต้ม แลก {nextReward.name_th}</span>
-                  <span>{Math.min(Math.round((currentPoints / nextReward.points_cost) * 100), 100)}%</span>
-                </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15">
+              <div className="mt-6 rounded-2xl bg-teal-50 p-4 text-sm font-bold text-teal-900">
+                อีก {Math.max(nextReward.points_cost - currentPoints, 0).toLocaleString('th-TH')} แต้ม แลก {nextReward.name_th}
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
                   <div
-                    className="h-full rounded-full bg-cyan-300"
+                    className="h-full rounded-full bg-teal-600"
                     style={{ width: `${Math.min((currentPoints / nextReward.points_cost) * 100, 100)}%` }}
                   />
                 </div>
               </div>
             ) : rewards.length > 0 ? (
-              <div className="mt-5 rounded-2xl bg-emerald-400/15 p-4 text-sm font-bold text-emerald-100 ring-1 ring-emerald-200/20">
+              <div className="mt-6 rounded-2xl bg-emerald-50 p-4 text-sm font-bold text-emerald-800">
                 แต้มของคุณพร้อมแลกรางวัลได้หลายรายการแล้ว
               </div>
             ) : null}
-          </div>
 
-          <div className="grid grid-cols-3 divide-x divide-slate-100 bg-white">
-            <Metric label="ได้ทั้งหมด" value={lifetimeEarned} />
-            <Metric label="ใช้ไปแล้ว" value={lifetimeRedeemed} />
-            <Metric label="แลกได้" value={redeemableCount} />
+            <a href="#rewards" className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-teal-700 px-5 py-4 text-base font-black text-white shadow-lg shadow-teal-900/15 active:scale-[0.99]">
+              <Gift className="h-5 w-5" aria-hidden="true" />
+              ดูของรางวัล
+            </a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-black text-slate-950">รับแต้มยังไง?</h2>
-              <p className="mt-1 text-sm text-slate-500">สะสมง่าย ใช้ได้จริงกับบริการของร้าน</p>
-            </div>
-            <div className="rounded-2xl bg-amber-50 p-3 text-amber-600">
-              <Trophy className="h-6 w-6" aria-hidden="true" />
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <EarnRule icon={<CheckCircle2 className="h-5 w-5" />} title="รับรองเท้าสำเร็จ" value="1 คู่ = 1 แต้ม" text="เมื่อคิวถูกปิดงานและร้านยืนยันว่าสะสมแต้มได้" />
-            <EarnRule
-              icon={<Star className="h-5 w-5" />}
-              title="รีวิว Google Maps"
-              value="+3 แต้ม"
-              text="รับได้ 1 ครั้งต่อบัญชี หลังรีวิวแล้วแจ้งแอดมินใน LINE เพื่อยืนยันแต้ม"
-              actionHref={GOOGLE_REVIEW_URL}
-              actionLabel="รีวิวร้านบน Google"
-            />
-            <EarnRule icon={<ShieldCheck className="h-5 w-5" />} title="แลกรางวัลผ่านแอดมิน" value="หักตามจริง" text="ลูกค้าแจ้งในแชท LINE แอดมินเป็นผู้ทำรายการให้" />
-          </div>
-        </section>
-
-        <section className="rounded-[28px] border border-cyan-100 bg-cyan-50 p-5">
-          <div className="flex gap-3">
-            <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-cyan-700" aria-hidden="true" />
-            <div>
-              <h3 className="font-black text-slate-950">ต้องการแลกรางวัล?</h3>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                ลูกค้าดูแต้มและเลือกของรางวัลจากหน้านี้ได้ จากนั้นแจ้งแอดมินในแชท LINE เพื่อให้แอดมินกดแลกรางวัลและใช้สิทธิ์ให้
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <div>
-              <h2 className="text-lg font-black text-slate-950">ของรางวัล</h2>
-              <p className="text-sm text-slate-500">ดูว่าแต้มของคุณแลกอะไรได้บ้าง</p>
-            </div>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-slate-200">{rewards.length} รายการ</span>
-          </div>
-
+      <div className="mx-auto max-w-6xl space-y-10 px-5 py-10 md:px-8">
+        <section id="rewards">
+          <SectionHeader icon={<Gift className="h-6 w-6" />} title="ของรางวัลแนะนำ" action={`${rewards.length} รายการ`} />
           {rewards.length === 0 ? (
             <EmptyCard title="ยังไม่มีของรางวัลที่เปิดใช้งาน" text="รอติดตามของรางวัลใหม่จากทางร้านได้เลย" />
           ) : (
-            <div className="space-y-3">
-              {rewards.map((reward) => (
-                <RewardCard key={reward.id} reward={reward} currentPoints={currentPoints} />
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {featuredRewards.map((reward, index) => (
+                <RewardCard key={reward.id} reward={reward} currentPoints={currentPoints} image={rewardImage(index)} />
               ))}
             </div>
           )}
         </section>
 
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-lg font-black text-slate-950">รางวัลของฉัน</h2>
-            <span className="text-xs font-bold text-slate-400">ล่าสุด 5 รายการ</span>
-          </div>
-
-          {redemptions.length === 0 ? (
-            <EmptyCard title="ยังไม่มีรายการแลกรางวัล" text="เมื่อแอดมินแลกรางวัลให้ รายการจะแสดงตรงนี้" />
-          ) : (
-            <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-              {redemptions.map((redemption) => (
-                <div key={redemption.id} className="border-b border-slate-100 p-4 last:border-b-0">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate font-bold text-slate-950">
-                        {redemption.reward_catalog?.name_th ?? 'ของรางวัล'}
-                      </div>
-                      <div className="mt-1 font-mono text-xs text-slate-400">{redemption.redemption_code}</div>
-                    </div>
-                    <StatusBadge status={redemptionDisplayStatus(redemption)} />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                    <span>ใช้ {redemption.points_cost.toLocaleString('th-TH')} แต้ม</span>
-                    <span>{formatDate(redemption.created_at)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <div>
-              <h2 className="text-lg font-black text-slate-950">ประวัติแต้มล่าสุด</h2>
-              <p className="text-sm text-slate-500">ยอดคงเหลือหลังแต่ละรายการ</p>
-            </div>
-            <History className="h-5 w-5 text-slate-400" aria-hidden="true" />
-          </div>
-
+        <section>
+          <SectionHeader icon={<History className="h-6 w-6" />} title="ประวัติคะแนน" action="ล่าสุด" />
           {transactions.length === 0 ? (
             <EmptyCard title="ยังไม่มีประวัติแต้ม" text="เมื่อได้รับหรือใช้แต้ม รายการจะแสดงตรงนี้" />
           ) : (
-            <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between gap-3 border-b border-slate-100 p-4 last:border-b-0">
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-bold text-slate-950">{sourceLabel(transaction.source_type)}</div>
-                    <div className="mt-1 text-xs text-slate-400">{formatDateTime(transaction.created_at)}</div>
-                    <div className="mt-1 text-xs font-semibold text-slate-500">คงเหลือ {Number(transaction.balance_after ?? 0).toLocaleString('th-TH')} แต้ม</div>
+            <div className="overflow-hidden rounded-[24px] border border-cyan-100 bg-white shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="min-w-[720px] w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-xs font-black text-slate-500">
+                    <tr>
+                      <th className="px-5 py-4">วันที่</th>
+                      <th className="px-5 py-4">รายการ</th>
+                      <th className="px-5 py-4 text-right">คะแนน</th>
+                      <th className="px-5 py-4 text-right">ยอดคงเหลือ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {transactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td className="px-5 py-4 text-slate-500">{formatDateTime(transaction.created_at)}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-50 text-teal-700">
+                              {transaction.points_delta > 0 ? <ShoppingBag className="h-4 w-4" /> : <Gift className="h-4 w-4" />}
+                            </div>
+                            <div>
+                              <div className="font-bold text-slate-950">{sourceLabel(transaction.source_type)}</div>
+                              {transaction.note ? <div className="mt-1 text-xs text-slate-400">{transaction.note}</div> : null}
+                            </div>
+                          </div>
+                        </td>
+                        <td className={`px-5 py-4 text-right font-black ${transaction.points_delta > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {transaction.points_delta > 0 ? '+' : ''}
+                          {transaction.points_delta.toLocaleString('th-TH')} แต้ม
+                        </td>
+                        <td className="px-5 py-4 text-right font-black text-teal-950">{Number(transaction.balance_after ?? 0).toLocaleString('th-TH')} แต้ม</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-[28px] border border-cyan-100 bg-white p-6 shadow-sm">
+          <div className="mb-6 inline-flex rounded-t-2xl border border-cyan-100 bg-white px-5 py-2 text-sm font-black text-teal-900 shadow-sm">
+            เกี่ยวกับคะแนนสะสม
+          </div>
+          <div className="grid gap-5 md:grid-cols-4">
+            <InfoRule icon={<ShoppingBag />} title="1 คู่ = 1 แต้ม" text="รับ 1 แต้มต่อรองเท้า 1 คู่ เมื่อร้านยืนยันการสะสม" />
+            <InfoRule icon={<CheckCircle2 />} title="สะสมอัตโนมัติ" text="หลังงานส่งมอบสำเร็จและแอดมินยืนยัน" />
+            <InfoRule icon={<Smartphone />} title="เช็คคะแนนได้เอง" text="ดูได้ตลอด 24 ชั่วโมงผ่าน LINE OA" />
+            <InfoRule icon={<Gift />} title="แลกรางวัลง่าย" text="แจ้งแอดมินใน LINE เพื่อทำรายการให้" />
+          </div>
+        </section>
+
+        <section className="grid gap-4 rounded-[28px] bg-gradient-to-r from-teal-100 to-cyan-50 p-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <h2 className="text-2xl font-black text-teal-950">อยากได้แต้มรีวิวเพิ่ม?</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              รีวิว Google Maps แล้วแจ้งแอดมินใน LINE เพื่อรับ +3 แต้ม ใช้ได้ 1 ครั้งต่อบัญชี
+            </p>
+          </div>
+          <a
+            href={GOOGLE_REVIEW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-teal-800 shadow-sm ring-1 ring-teal-100"
+          >
+            รีวิว Google
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </section>
+
+        <section>
+          <SectionHeader icon={<Ticket className="h-6 w-6" />} title="รางวัลของฉัน" action="ล่าสุด 5 รายการ" />
+          {redemptions.length === 0 ? (
+            <EmptyCard title="ยังไม่มีรายการแลกรางวัล" text="เมื่อแอดมินแลกรางวัลให้ รายการจะแสดงตรงนี้" />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {redemptions.map((redemption) => (
+                <div key={redemption.id} className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate font-black text-slate-950">{redemption.reward_catalog?.name_th ?? 'ของรางวัล'}</div>
+                      <div className="mt-1 text-xs text-slate-400">แลกเมื่อ {formatDate(redemption.created_at)}</div>
+                    </div>
+                    <StatusBadge status={redemptionDisplayStatus(redemption)} />
                   </div>
-                  <div className={`shrink-0 rounded-2xl px-3 py-2 text-lg font-black ${transaction.points_delta > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                    {transaction.points_delta > 0 ? '+' : ''}
-                    {transaction.points_delta.toLocaleString('th-TH')}
-                  </div>
+                  <div className="mt-3 text-sm font-bold text-slate-500">ใช้ {redemption.points_cost.toLocaleString('th-TH')} แต้ม</div>
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        <Link
-          href="/status"
-          className="block rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-black text-slate-900 shadow-sm active:scale-[0.99]"
-        >
-          เช็คสถานะรองเท้า
-        </Link>
+        <section className="rounded-[28px] bg-teal-800 px-6 py-7 text-white">
+          <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div className="text-2xl font-black">ร้านซักเกิบแอนด์สปา</div>
+              <p className="mt-2 text-sm text-teal-100">ทุกการใช้บริการ มีคุณค่ามากกว่าที่เคย</p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/status" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-teal-900">
+                <Clock3 className="h-4 w-4" />
+                เช็คสถานะ
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   )
 }
 
-function RewardsHeader() {
+function RewardsHeader({ sessionName, compact = false }: { sessionName?: string | null; compact?: boolean }) {
   return (
-    <header className="bg-slate-950 px-6 pb-8 pt-14 text-white">
-      <div className="mx-auto max-w-lg">
-        <div className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">ร้านซักเกิบแอนด์สปา</div>
-        <h1 className="text-3xl font-black tracking-tight">สะสมแต้ม</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-300">เช็คแต้มสะสม ดูวิธีรับแต้ม และเลือกของรางวัลที่อยากแลก</p>
+    <header className="sticky top-0 z-20 border-b border-cyan-100 bg-white/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
+        <div className="min-w-0">
+          <div className="text-xl font-black leading-tight text-teal-900 md:text-2xl">ซักเกิบแอนด์สปา</div>
+          <div className="text-xs font-semibold text-teal-500">Shoe Spa & Cleaning</div>
+        </div>
+
+        {!compact ? (
+          <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
+            <Link href="/service" className="inline-flex items-center gap-1.5 hover:text-teal-700">
+              <Home className="h-4 w-4" />
+              หน้าแรก
+            </Link>
+            <Link href="/service" className="hover:text-teal-700">บริการของเรา</Link>
+            <Link href="/status" className="hover:text-teal-700">เช็คสถานะ</Link>
+            <span className="border-b-2 border-teal-600 px-2 py-2 text-teal-700">คะแนนสะสม</span>
+            <a href="tel:0650000000" className="inline-flex items-center gap-1.5 hover:text-teal-700">
+              <Phone className="h-4 w-4" />
+              ติดต่อเรา
+            </a>
+          </nav>
+        ) : null}
+
+        <div className="inline-flex max-w-[180px] items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-black text-teal-900">
+          <MessageCircle className="h-4 w-4 shrink-0 text-green-500" />
+          <span className="truncate">{sessionName || 'บัญชีของฉัน'}</span>
+        </div>
       </div>
     </header>
   )
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+function SectionHeader({ icon, title, action }: { icon: ReactNode; title: string; action?: string }) {
   return (
-    <div className="px-4 py-4 text-center">
-      <div className="text-xs font-semibold text-slate-500">{label}</div>
-      <div className="mt-1 text-2xl font-black text-slate-950">{Number(value || 0).toLocaleString('th-TH')}</div>
+    <div className="mb-5 flex items-center justify-between gap-3">
+      <h2 className="flex items-center gap-2 text-2xl font-black text-teal-950">
+        <span className="text-teal-600">{icon}</span>
+        {title}
+      </h2>
+      {action ? <span className="text-sm font-black text-slate-500">{action}</span> : null}
     </div>
   )
 }
 
-function EarnRule({
-  icon,
-  title,
-  value,
-  text,
-  actionHref,
-  actionLabel,
-}: {
-  icon: ReactNode
-  title: string
-  value: string
-  text: string
-  actionHref?: string
-  actionLabel?: string
-}) {
+function MiniRule({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
-    <div className="flex gap-3 rounded-2xl bg-slate-50 p-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-cyan-700 ring-1 ring-slate-200">
-        {icon}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-bold text-slate-950">{title}</h3>
-          <span className="shrink-0 rounded-full bg-cyan-100 px-3 py-1 text-xs font-black text-cyan-800">{value}</span>
-        </div>
-        <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
-        {actionHref && actionLabel ? (
-          <a
-            href={actionHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-black text-cyan-700 ring-1 ring-cyan-100 active:scale-[0.99]"
-          >
-            {actionLabel}
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-          </a>
-        ) : null}
+    <div className="flex items-center gap-3">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-teal-700">{icon}</div>
+      <div>
+        <div className="font-black text-teal-950">{title}</div>
+        <div className="text-sm font-semibold text-slate-500">{text}</div>
       </div>
     </div>
   )
 }
 
-function RewardCard({ reward, currentPoints }: { reward: RewardCatalogRow; currentPoints: number }) {
+function RewardCard({ reward, currentPoints, image }: { reward: RewardCatalogRow; currentPoints: number; image: string }) {
   const canRedeem = currentPoints >= reward.points_cost
   const remaining = Math.max(reward.points_cost - currentPoints, 0)
-  const progress = reward.points_cost > 0 ? Math.min((currentPoints / reward.points_cost) * 100, 100) : 100
 
   return (
-    <article className={`overflow-hidden rounded-[24px] border bg-white shadow-sm ${canRedeem ? 'border-emerald-200' : 'border-slate-200'}`}>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${canRedeem ? 'bg-emerald-50 text-emerald-700' : 'bg-cyan-50 text-cyan-700'}`}>
-                <Ticket className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="truncate font-black text-slate-950">{reward.name_th}</h3>
-                <div className="mt-0.5 text-xs font-bold text-slate-400">{rewardTypeLabel(reward.metadata.reward_type)}</div>
-              </div>
-            </div>
-            {reward.description && (
-              <p className="mt-3 text-sm leading-6 text-slate-600">{reward.description}</p>
-            )}
-          </div>
-          <div className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${canRedeem ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-            {canRedeem ? 'แลกได้' : `ขาด ${remaining.toLocaleString('th-TH')}`}
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl bg-slate-50 p-3">
-          <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-500">
-            <span>{currentPoints.toLocaleString('th-TH')} / {reward.points_cost.toLocaleString('th-TH')} แต้ม</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-            <div className={`h-full rounded-full ${canRedeem ? 'bg-emerald-500' : 'bg-cyan-500'}`} style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Chip strong>{reward.points_cost.toLocaleString('th-TH')} แต้ม</Chip>
-          {reward.metadata.valid_days ? <Chip>อายุ {reward.metadata.valid_days} วัน</Chip> : null}
-          {reward.metadata.max_value ? <Chip>สูงสุด {reward.metadata.max_value} บาท</Chip> : null}
-          {reward.metadata.discount_amount ? <Chip>ลด {reward.metadata.discount_amount} บาท</Chip> : null}
-          {reward.metadata.quantity ? <Chip>{reward.metadata.quantity} ชิ้น</Chip> : null}
-        </div>
+    <article className="grid overflow-hidden rounded-[22px] border border-cyan-100 bg-white shadow-sm sm:grid-cols-[120px_1fr] md:block">
+      <div className="h-full min-h-[140px] bg-cyan-50">
+        <img src={image} alt="" className="h-full w-full object-cover" />
       </div>
-
-      <div className={`border-t px-4 py-3 text-xs leading-6 ${canRedeem ? 'border-emerald-100 bg-emerald-50 text-emerald-800' : 'border-slate-100 bg-white text-slate-500'}`}>
-        {canRedeem ? 'แต้มถึงแล้ว แจ้งแอดมินในแชท LINE เพื่อแลกรางวัลได้เลย' : 'สะสมเพิ่มอีกนิด แล้วกลับมาแลกรางวัลนี้ได้'}
+      <div className="flex min-h-[170px] flex-col p-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-black leading-snug text-slate-950">{reward.name_th}</h3>
+          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-black ${canRedeem ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+            {canRedeem ? 'แลกได้' : `ขาด ${remaining.toLocaleString('th-TH')}`}
+          </span>
+        </div>
+        <div className="mt-2 text-2xl font-black text-teal-600">{reward.points_cost.toLocaleString('th-TH')} <span className="text-sm">แต้ม</span></div>
+        {reward.description ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">{reward.description}</p> : null}
+        <div className="mt-auto pt-4">
+          <div className="inline-flex items-center gap-2 rounded-xl bg-cyan-50 px-3 py-2 text-xs font-black text-teal-700">
+            <Gift className="h-4 w-4" />
+            แจ้งแอดมินเพื่อแลก
+          </div>
+        </div>
       </div>
     </article>
   )
 }
 
-function Chip({ children, strong = false }: { children: ReactNode; strong?: boolean }) {
+function InfoRule({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
-    <span className={`rounded-full px-3 py-1 text-xs font-bold ${strong ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-600'}`}>
-      {children}
-    </span>
+    <div className="text-center md:border-r md:border-cyan-100 md:last:border-r-0">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cyan-50 text-teal-700 [&>svg]:h-6 [&>svg]:w-6">
+        {icon}
+      </div>
+      <h3 className="mt-3 font-black text-teal-950">{title}</h3>
+      <p className="mx-auto mt-2 max-w-[220px] text-sm leading-6 text-slate-500">{text}</p>
+    </div>
   )
 }
 
 function EmptyCard({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-slate-200 bg-white p-6 text-center">
-      <Gift className="mx-auto h-8 w-8 text-slate-300" aria-hidden="true" />
+    <div className="rounded-[24px] border border-dashed border-cyan-200 bg-white p-8 text-center">
+      <Gift className="mx-auto h-8 w-8 text-cyan-300" aria-hidden="true" />
       <h3 className="mt-3 font-black text-slate-900">{title}</h3>
       <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
     </div>
@@ -499,24 +486,14 @@ function StatusBadge({ status }: { status: string }) {
         ? 'bg-amber-50 text-amber-700'
         : 'bg-emerald-50 text-emerald-700'
 
-  return (
-    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${className}`}>
-      {label}
-    </span>
-  )
-}
-
-function rewardTypeLabel(type?: string) {
-  if (type === 'fixed_discount') return 'ส่วนลด'
-  if (type === 'standard_sneaker_cleaning') return 'ซักรองเท้าฟรี'
-  if (type === 'physical_gift') return 'ของแถม'
-  return 'ของรางวัล'
+  return <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${className}`}>{label}</span>
 }
 
 function sourceLabel(sourceType: string) {
   const labels: Record<string, string> = {
-    service_delivery: 'ได้รับแต้มจากงานบริการ',
+    service_delivery: 'ใช้บริการซักรองเท้า',
     google_review: 'ได้รับแต้มรีวิว Google',
+    facebook_review: 'ได้รับแต้มรีวิว Facebook',
     reward_redeem: 'แลกรางวัล',
     reward_use: 'ใช้รางวัล',
     reward_cancel: 'ยกเลิกรางวัล',
@@ -546,6 +523,11 @@ function redemptionDisplayStatus(redemption: RedemptionRow) {
   const expiresAt = redemption.metadata?.expires_at ? new Date(redemption.metadata.expires_at) : null
   if (expiresAt && expiresAt.getTime() < Date.now()) return 'expired'
   return 'ready_to_use'
+}
+
+function rewardImage(index: number) {
+  const images = ['/oncloud-after.jpg', '/after.jpg', '/birken-after.jpg', '/speedcat-after.jpg']
+  return images[index % images.length]
 }
 
 function formatDate(value: string) {
