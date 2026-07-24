@@ -10,21 +10,20 @@ import {
   History,
   LockKeyhole,
   MessageCircle,
-  ShieldCheck,
   ShoppingBag,
   Smartphone,
-  Sparkles,
-  Star,
   Ticket,
-  WalletCards,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { LinkPhoneForm } from '../status/LinkPhoneForm'
+import { WelcomeBonusClaimCard } from './WelcomeBonusClaimCard'
 
 export const dynamic = 'force-dynamic'
 
 const GOOGLE_REVIEW_URL = 'https://g.page/r/CUaWHRM3krtXEBM/review'
+const WELCOME_BONUS_CAMPAIGN_CODE = 'WELCOME_1_POINT_2026'
+const WELCOME_BONUS_POINTS = 1
 
 type RewardMetadata = {
   reward_type?: string
@@ -114,6 +113,7 @@ export default async function RewardsPage() {
     rewardsResult,
     ledgerResult,
     redemptionResult,
+    welcomeBonusClaimResult,
   ] = await Promise.all([
     rewardsDb
       .from('reward_accounts')
@@ -156,6 +156,12 @@ export default async function RewardsPage() {
       .eq('customer_id', customer.id)
       .order('created_at', { ascending: false })
       .limit(5),
+    rewardsDb
+      .from('reward_campaign_claims')
+      .select('id, claimed_at')
+      .eq('campaign_code', WELCOME_BONUS_CAMPAIGN_CODE)
+      .eq('customer_id', customer.id)
+      .maybeSingle(),
   ])
 
   const account = accountResult.data
@@ -170,6 +176,7 @@ export default async function RewardsPage() {
   const nextReward = rewards.find((reward) => reward.points_cost > currentPoints)
   const redeemableCount = rewards.filter((reward) => reward.points_cost <= currentPoints).length
   const featuredRewards = rewards.slice(0, 4)
+  const welcomeBonusClaimed = Boolean(welcomeBonusClaimResult.data)
 
   return (
     <main className="min-h-screen bg-[#F7FBFB] text-slate-950">
@@ -231,6 +238,12 @@ export default async function RewardsPage() {
               <Gift className="h-5 w-5" aria-hidden="true" />
               ดูของรางวัล
             </a>
+
+            <WelcomeBonusClaimCard
+              initialClaimed={welcomeBonusClaimed}
+              initialBalance={currentPoints}
+              points={WELCOME_BONUS_POINTS}
+            />
           </div>
         </div>
       </section>
