@@ -30,6 +30,7 @@ const GOOGLE_REVIEW_URL = 'https://g.page/r/CUaWHRM3krtXEBM/review'
 
 type RewardMetadata = {
   reward_type?: string
+  image_url?: string
   valid_days?: number
   max_value?: number
   discount_amount?: number
@@ -245,7 +246,7 @@ export default async function RewardsPage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {featuredRewards.map((reward, index) => (
-                <RewardCard key={reward.id} reward={reward} currentPoints={currentPoints} image={rewardImage(index)} />
+                <RewardCard key={reward.id} reward={reward} currentPoints={currentPoints} image={rewardImage(reward, index)} />
               ))}
             </div>
           )}
@@ -525,7 +526,9 @@ function redemptionDisplayStatus(redemption: RedemptionRow) {
   return 'ready_to_use'
 }
 
-function rewardImage(index: number) {
+function rewardImage(reward: RewardCatalogRow, index: number) {
+  if (reward.metadata.image_url) return reward.metadata.image_url
+
   const images = ['/oncloud-after.jpg', '/after.jpg', '/birken-after.jpg', '/speedcat-after.jpg']
   return images[index % images.length]
 }
