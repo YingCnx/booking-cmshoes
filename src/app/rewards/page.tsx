@@ -8,10 +8,8 @@ import {
   ExternalLink,
   Gift,
   History,
-  Home,
   LockKeyhole,
   MessageCircle,
-  Phone,
   ShieldCheck,
   ShoppingBag,
   Smartphone,
@@ -375,22 +373,6 @@ function RewardsHeader({ sessionName, compact = false }: { sessionName?: string 
           <div className="text-xl font-black leading-tight text-teal-900 md:text-2xl">ซักเกิบแอนด์สปา</div>
           <div className="text-xs font-semibold text-teal-500">Shoe Spa & Cleaning</div>
         </div>
-
-        {!compact ? (
-          <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
-            <Link href="/service" className="inline-flex items-center gap-1.5 hover:text-teal-700">
-              <Home className="h-4 w-4" />
-              หน้าแรก
-            </Link>
-            <Link href="/service" className="hover:text-teal-700">บริการของเรา</Link>
-            <Link href="/status" className="hover:text-teal-700">เช็คสถานะ</Link>
-            <span className="border-b-2 border-teal-600 px-2 py-2 text-teal-700">คะแนนสะสม</span>
-            <a href="tel:0650000000" className="inline-flex items-center gap-1.5 hover:text-teal-700">
-              <Phone className="h-4 w-4" />
-              ติดต่อเรา
-            </a>
-          </nav>
-        ) : null}
 
         <div className="inline-flex max-w-[180px] items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-black text-teal-900">
           <MessageCircle className="h-4 w-4 shrink-0 text-green-500" />
