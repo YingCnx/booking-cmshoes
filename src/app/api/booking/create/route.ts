@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   // 2. ถ้าไม่มี → ตรวจ phone (unique per branch):
   //    - เจอ → UPDATE name + line_user_id + line_display_name
   //    - ไม่เจอ → INSERT ใหม่ + สร้าง customer_code = C{branchId}{id padded 3}
-  // (address/shoe_count ไม่บันทึกใน customers — เก็บใน appointments เท่านั้น)
+  // 3. เมื่อสร้างนัดหมายสำเร็จ → เติม address จาก location เฉพาะกรณีที่ address ยังว่าง
   // ============================================
   let customer: any = null
 
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
   if (session.lineUserId) {
     const { data } = await supabase
       .from('customers')
-      .select('id, branch_id, phone')
+      .select('id, branch_id, phone, address')
       .eq('line_user_id', session.lineUserId)
       .maybeSingle()
     customer = data
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     // หา phone ซ้ำใน branch เดียวกัน
     const { data: byPhone } = await supabase
       .from('customers')
-      .select('id, line_user_id, branch_id')
+      .select('id, line_user_id, branch_id, address')
       .eq('phone', phone)
       .eq('branch_id', session.branchId)
       .maybeSingle()
@@ -124,10 +124,10 @@ export async function POST(req: Request) {
           branch_id: session.branchId,
           line_user_id: session.lineUserId,
           line_display_name: session.displayName,
-          origin_source: 'line_booking',
+          origin_source: 'line',
           status: 'active',
         })
-        .select('id, branch_id')
+        .select('id, branch_id, address')
         .single()
 
       if (cErr || !newC) {
@@ -174,6 +174,21 @@ export async function POST(req: Request) {
     return NextResponse.json({
       error: 'สร้างการจองไม่สำเร็จ: ' + aptErr?.message,
     }, { status: 500 })
+  }
+
+  // นัดหมายนี้เป็นข้อมูลล่าสุด จึงใช้ location เติม address เมื่อลูกค้ายังไม่มีที่อยู่เท่านั้น
+  if (!customer.address || !String(customer.address).trim()) {
+    const addressUpdate = supabase.from('customers')
+      .update({ address: location })
+      .eq('id', customer.id)
+
+    const { error: addressErr } = customer.address == null
+      ? await addressUpdate.is('address', null)
+      : await addressUpdate.eq('address', customer.address)
+
+    if (addressErr) {
+      console.error('อัปเดตที่อยู่ลูกค้าไม่สำเร็จ:', addressErr.message)
+    }
   }
 
   // แจ้ง LINE (non-blocking)

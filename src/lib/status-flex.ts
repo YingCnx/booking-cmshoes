@@ -49,6 +49,44 @@ function compactRow(icon: string, label: string, value: string | number) {
 // ============================================
 function progressBar(step: number) {
   const labels = ['รับเข้า', 'ทำความสะอาด', 'เตรียมส่ง', 'กำลังส่ง', 'สำเร็จ']
+  const contents: any[] = []
+
+  labels.forEach((_, index) => {
+    const stage = index + 1
+    const completed = stage < step
+    const current = stage === step
+
+    contents.push({
+      type: 'box',
+      layout: 'vertical',
+      width: '26px',
+      height: '26px',
+      cornerRadius: '13px',
+      backgroundColor: completed ? '#14B8A6' : current ? '#0F766E' : '#F3F4F6',
+      borderColor: completed || current ? undefined : '#D1D5DB',
+      borderWidth: completed || current ? undefined : '1px',
+      justifyContent: 'center',
+      contents: [{
+        type: 'text',
+        text: completed ? '✓' : String(stage),
+        size: 'sm',
+        weight: completed || current ? 'bold' : 'regular',
+        color: completed || current ? '#FFFFFF' : '#6B7280',
+        align: 'center',
+      }],
+    })
+
+    if (stage < labels.length) {
+      contents.push({
+        type: 'box',
+        layout: 'vertical',
+        height: '2px',
+        backgroundColor: stage < step ? '#14B8A6' : '#D1D5DB',
+        flex: 1,
+        contents: [{ type: 'filler' }],
+      })
+    }
+  })
 
   return {
     type: 'box',
@@ -58,32 +96,18 @@ function progressBar(step: number) {
       {
         type: 'box',
         layout: 'horizontal',
-        contents: labels.map((_, index) => ({
-          type: 'box',
-          layout: 'vertical',
-          flex: 1,
-          alignItems: 'center',
-          contents: [
-            {
-              type: 'box',
-              layout: 'vertical',
-              width: '14px',
-              height: '14px',
-              cornerRadius: '100px',
-              backgroundColor: index + 1 <= step ? '#1877F2' : '#D1D5DB',
-              contents: [{ type: 'filler' }],
-            },
-          ],
-        })),
+        alignItems: 'center',
+        contents,
       },
       {
         type: 'box',
         layout: 'horizontal',
-        contents: labels.map((label) => ({
+        contents: labels.map((label, index) => ({
           type: 'text',
           text: String(label),
           size: 'xxs',
-          color: '#374151',
+          color: index + 1 === step ? '#0F766E' : '#6B7280',
+          weight: index + 1 === step ? 'bold' : 'regular',
           align: 'center',
           flex: 1,
           wrap: true,
@@ -105,10 +129,14 @@ export function buildQueueBubble(q: StatusQueue) {
 
   const deliveryLabel = q.delivery_date
     ? new Date(q.delivery_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '-'
+    : 'ยังไม่กำหนด'
 
   // ✅ แก้ operator precedence — ใช้ queue_number ถ้ามี ไม่งั้น fallback #id
   const queueLabel = q.queue_number ? `คิว #${q.queue_number}` : `คิว #${q.id}`
+
+  const statusLabel = q.status === 'อยู่ระหว่างทำความสะอาด'
+    ? 'อยู่ระหว่างทำความสะอาด'
+    : String(q.status || '-')
 
   return {
     type: 'bubble',
@@ -120,56 +148,61 @@ export function buildQueueBubble(q: StatusQueue) {
       type: 'box',
       layout: 'vertical',
       paddingAll: '20px',
-      spacing: 'lg',
       contents: [
         {
           type: 'box',
           layout: 'horizontal',
+          alignItems: 'center',
           contents: [
             {
-              type: 'text',
-              text: queueLabel,
-              size: 'sm',
-              color: '#6B7280',
-              weight: 'bold',
-              gravity: 'center',
-              flex: 1,
+              type: 'box', layout: 'vertical', width: '48px', height: '48px',
+              cornerRadius: '24px', backgroundColor: '#E6FFFB', justifyContent: 'center',
+              contents: [{ type: 'text', text: '👟', size: 'xl', align: 'center' }],
             },
             {
               type: 'box',
               layout: 'vertical',
-              backgroundColor: '#12c1de',
-              cornerRadius: '20px',
-              paddingStart: '12px',
-              paddingEnd: '12px',
-              paddingTop: '6px',
-              paddingBottom: '6px',
-              flex: 0,
+              margin: 'md', flex: 1,
               contents: [
-                {
-                  type: 'text',
-                  text: String(q.status || '-'),
-                  size: 'xs',
-                  color: '#FFFFFF',
-                  weight: 'bold',
-                  align: 'center',
-                },
+                { type: 'text', text: 'สถานะรองเท้าของคุณ', size: 'sm', weight: 'bold', color: '#334155' },
+                { type: 'text', text: queueLabel, size: 'xxl', weight: 'bold', color: '#0F766E', margin: 'xs' },
               ],
             },
           ],
         },
         {
-          type: 'text',
-          text: String(`${q.total_pairs || 0} คู่`),
-          size: '3xl',
-          weight: 'bold',
-          color: '#111827',
+          type: 'box', layout: 'vertical', backgroundColor: '#CCFBF1', cornerRadius: '20px',
+          paddingAll: '10px', margin: 'lg',
+          contents: [{ type: 'text', text: `✨  ${statusLabel}`, size: 'sm', weight: 'bold', color: '#0F766E', align: 'center' }],
         },
-        progressBar(step),
-        { type: 'separator', margin: 'lg', color: '#E5E7EB' },
-        compactRow('📅', 'วันที่รับ', receivedLabel),
-        compactRow('🚚', 'กำหนดส่ง', deliveryLabel),
-        compactRow('💵', 'ยอดรวม', q.total_price ? `฿${q.total_price.toLocaleString()}` : '-'),
+        {
+          type: 'box', layout: 'horizontal', backgroundColor: '#F8FAFC', cornerRadius: '16px',
+          height: '112px', paddingAll: '16px', margin: 'lg', alignItems: 'center', justifyContent: 'center',
+          contents: [
+            { type: 'text', text: String(q.total_pairs ?? 0), size: '4xl', weight: 'bold', color: '#0F766E', gravity: 'center', flex: 0 },
+            { type: 'text', text: 'คู่', size: 'lg', weight: 'bold', color: '#334155', gravity: 'center', margin: 'md', flex: 0 },
+          ],
+        },
+        { ...progressBar(step), margin: 'xl' },
+        {
+          type: 'box', layout: 'vertical', backgroundColor: '#CCFBF1', cornerRadius: '14px',
+          paddingAll: '12px', margin: 'xl',
+          contents: [
+            { type: 'text', text: `✨ ขั้นตอนที่ ${step} จาก 5`, size: 'sm', weight: 'bold', color: '#0F766E' },
+            { type: 'text', text: statusLabel, size: 'xs', color: '#115E59', margin: 'xs' },
+          ],
+        },
+        {
+          type: 'box', layout: 'vertical', backgroundColor: '#F8FAFC', cornerRadius: '16px',
+          paddingAll: '16px', margin: 'lg',
+          contents: [
+            compactRow('📅', 'วันที่รับ', receivedLabel),
+            { type: 'separator', color: '#E2E8F0', margin: 'md' },
+            compactRow('🚚', 'กำหนดส่ง', deliveryLabel),
+            { type: 'separator', color: '#E2E8F0', margin: 'md' },
+            compactRow('💳', 'ยอดรวม', q.total_price == null ? '-' : `฿${q.total_price.toLocaleString()}`),
+          ],
+        },
       ],
     },
   }
@@ -181,10 +214,12 @@ export function buildQueueBubble(q: StatusQueue) {
 export function buildStatusCarouselFlex(queues: StatusQueue[]) {
   if (!queues || queues.length === 0) return null
 
-  const bubbles = queues.slice(0, 12).map(buildQueueBubble)
+  const bubbles = queues.slice(0, 8).map(buildQueueBubble)
 
   if (bubbles.length === 1) {
-    return { type: 'flex', altText: 'สถานะรองเท้าของคุณ', contents: bubbles[0] }
+    const queue = queues[0]
+    const queueLabel = queue.queue_number ? `คิว ${queue.queue_number}` : `คิว ${queue.id}`
+    return { type: 'flex', altText: `${queueLabel}: ${queue.status}`, contents: bubbles[0] }
   }
 
   return {

@@ -19,7 +19,7 @@ type Props = {
   }
 }
 
-type ActionType = 'confirm' | 'receive' | 'cancel' | null
+type ActionType = 'confirm' | 'receive' | 'deliver' | 'cancel' | null
 
 const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
   newStatus: string
@@ -42,6 +42,14 @@ const ACTION_CONFIG: Record<Exclude<ActionType, null>, {
     title: 'รับรองเท้าเข้าร้านแล้ว?',
     desc: 'ยืนยันว่ารับรองเท้าจากลูกค้าเรียบร้อยแล้ว',
     btnText: 'รับรองเท้าแล้ว',
+    btnClass: 'bg-blue-600 hover:bg-blue-500',
+    loadingText: 'กำลังบันทึก...',
+  },
+  deliver: {
+    newStatus: 'สำเร็จ',
+    title: 'จัดส่งรองเท้าสำเร็จแล้ว?',
+    desc: 'ยืนยันว่าจัดส่งรองเท้าให้ลูกค้าเรียบร้อยแล้ว',
+    btnText: 'จัดส่งสำเร็จ',
     btnClass: 'bg-blue-600 hover:bg-blue-500',
     loadingText: 'กำลังบันทึก...',
   },
@@ -153,11 +161,12 @@ export function AppointmentActions({ appointmentId, currentStatus, appointmentTy
           </button>
         )}
 
-        {/* ยืนยันแล้ว + นัดส่ง → แจ้งให้ทำที่ Desktop */}
+        {/* ยืนยันแล้ว + นัดส่ง → จัดส่งรองเท้าสำเร็จ */}
         {currentStatus === 'ยืนยันแล้ว' && !isPickup && (
-          <div className="w-full py-4 border border-blue-800 text-blue-400 text-sm text-center rounded-2xl">
-            นัดส่ง — กรุณาอัพเดทสถานะที่ระบบหลัก
-          </div>
+          <button onClick={() => setPendingAction('deliver')}
+            className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition">
+            🚚 จัดส่งรองเท้าสำเร็จ
+          </button>
         )}
 
         {/* ยกเลิก (ทุก status) */}
