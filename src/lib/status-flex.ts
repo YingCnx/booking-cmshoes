@@ -55,6 +55,7 @@ function progressBar(step: number) {
     const stage = index + 1
     const completed = stage < step
     const current = stage === step
+    const checked = completed || (current && step === labels.length)
 
     contents.push({
       type: 'box',
@@ -62,13 +63,13 @@ function progressBar(step: number) {
       width: '26px',
       height: '26px',
       cornerRadius: '13px',
-      backgroundColor: completed ? '#14B8A6' : current ? '#0F766E' : '#F3F4F6',
+      backgroundColor: checked ? '#14B8A6' : current ? '#0F766E' : '#F3F4F6',
       borderColor: completed || current ? undefined : '#D1D5DB',
       borderWidth: completed || current ? undefined : '1px',
       justifyContent: 'center',
       contents: [{
         type: 'text',
-        text: completed ? '✓' : String(stage),
+        text: checked ? '✓' : String(stage),
         size: 'sm',
         weight: completed || current ? 'bold' : 'regular',
         color: completed || current ? '#FFFFFF' : '#6B7280',
